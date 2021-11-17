@@ -1,3 +1,35 @@
+#ifndef QR_SOLVE_H_INCLUDED
+#define QR_SOLVE_H_INCLUDED
+
+/// @brief Represents a vector
+///
+/// @note This is a class implementing the vector operations in QRsolve.h
+///
+class Vector {
+public:
+    Vector(float *pComponents, size_t numComponents)
+    : x{pComponents[0]},
+      y{pComponents[1]},
+      z{numComponents > 2 ? pComponents[2] : 0},
+    {
+        
+    }
+    
+    /// @brief returns the dot product of the receiver and the argument
+    double dotWith(const Vector &rhs) const {
+        return x*rhs.x + y*rhs.y + z*rhs.z;
+    }
+    
+    /// @brief returns the vector's magnitude
+    double norm() const {
+        return sqrt(this->dotWith(*this));
+    }
+    
+private:
+    float x = 0;
+    float y = 0;
+    float z = 0;
+};
 
 float norm(float* vector,int len){
     float n=0;
@@ -295,3 +327,5 @@ void affineRobust(float* RT,float* pts1,float* pts2,int len){
 	delete pts1b; delete pts2b; delete err; delete err2;
 	
 }
+
+#endif // QR_SOLVE_H_INCLUDED
