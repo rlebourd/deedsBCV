@@ -1,6 +1,18 @@
 
+/// @brief Applies a box filter to image data
+/// @note Box filters are often used to efficiently approximate Gaussian filters
+///
+/// @param [out] input is the image to filter
+/// @param [out] temp1 is a temporary buffer the same size as the input, provided by the caller to provide the function with memory necessary to perform the filter calculations
+/// @param [out] temp2 is a temporary buffer the same size as the input, provided by the caller to provide the function with memory necessary to perform the filter calculations
+/// @param [in] hw is
+/// @param [in] m is dimension #1 of the input image
+/// @param [in] n is dimension #2 of the input image
+/// @param [in] o is dimension #3 of the input image
+///
 void boxfilter(float* input,float* temp1,float* temp2,int hw,int m,int n,int o){
     
+    // calculate length of the 'input' and 'temp1' vectors
     int sz=m*n*o;
     for(int i=0;i<sz;i++){
         temp1[i]=input[i];
@@ -76,6 +88,17 @@ void boxfilter(float* input,float* temp1,float* temp2,int hw,int m,int n,int o){
 }
 
 
+/// @brief Shifts an image by the specified vectorial displacement
+///
+/// @param [in] input is the image to shift
+/// @param [out] output is where the shifted image will reside
+/// @param [out] dx is the amount to shift the image along the horizontal axis
+/// @param [in] dy is the amount to shift the image along the vertical axis
+/// @param [in] dz is the amount to shift the image along the depth axis
+/// @param [in] m is dimension #1 of the input image
+/// @param [in] n is dimension #2 of the input image
+/// @param [in] o is dimension #3 of the input image
+///
 void imshift(float* input,float* output,int dx,int dy,int dz,int m,int n,int o){
     for(int k=0;k<o;k++){
         for(int j=0;j<n;j++){
@@ -101,7 +124,20 @@ void imshift(float* input,float* output,int dx,int dy,int dz,int m,int n,int o){
     int n=image_n;
     int o=image_o;*/
 
+
+/// @brief
+///
+/// @param [in] im1 is the image
+/// @param [out] d1 is
+/// @param [in] m is dimension #1 of the input image
+/// @param [in] n is dimension #2 of the input image
+/// @param [in] o is dimension #3 of the input image
+/// @param [in] qs is the quantisation
+/// @param [in] l
+///
 void distances(float* im1,float* d1,int m,int n,int o,int qs,int l){
+    // calculates the total number of elements in the 3D im1 matrix
+    // creates three temporary buffers the same size as the 3D im1 matrix
     int sz1=m*n*o;
 	float* w1=new float[sz1];
     int len1=6;
@@ -123,6 +159,10 @@ void distances(float* im1,float* d1,int m,int n,int o,int qs,int l){
     delete temp1; delete temp2; delete w1;
 }
 
+/// @brief
+///
+/// @param [in] qs stands for 'quantisation'
+///
 //__builtin_popcountll(left[i]^right[i]); absolute hamming distances
 void descriptor(uint64_t* mindq,float* im1,int m,int n,int o,int qs){
 	timeval time1,time2;
