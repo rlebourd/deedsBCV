@@ -31,6 +31,9 @@ private:
     float z = 0;
 };
 
+/// @brief Calculates the magnitude of a vector
+/// @param [in] vector The vector
+/// @param [in] len The length of the vector
 float norm(float* vector,int len){
     float n=0;
     for(int i=0;i<len;i++){
@@ -39,6 +42,10 @@ float norm(float* vector,int len){
     return sqrt(n);
 }
 
+/// @brief Calculates the dot product of a pair of vectors having "len" components
+/// @param [in] vector The first vector
+/// @param [in] vector2 The second vector
+/// @param [in] len The length of the vectors
 float dotprod(float* vector,float* vector2,int len){
     float dot=0;
     for(int i=0;i<len;i++){
@@ -47,6 +54,18 @@ float dotprod(float* vector,float* vector2,int len){
     return dot;
 }
 
+/// @brief Implements QR decomposition
+///
+/// Solves a system of linear equations through QR decomposition, which is an algorithm
+/// for factorizing a matrix A into a product of matrices QR where Q is orthogonal and R
+/// is upper triangular. See the documentation for the analogous function in R
+/// (https://www.rdocumentation.org/packages/pracma/versions/1.9.9/topics/qrSolve)
+///
+/// @param [out] X
+/// @param [in] A -
+/// @param [in] b is a numeric vector of length 4
+/// @param [in] len -
+/// @param [in] len2
 void qrsolve(float* X,float* A,float* b,int len,int len2){
     //first column
     float* Q=new float[4*len];
@@ -106,8 +125,10 @@ void qrsolve(float* X,float* A,float* b,int len,int len2){
         //printf("x1: %f, x2: %f, x3: %f, x4: %f\n",x1,x2,x3,x4);
     }
     
+    delete Q;
 }
 
+/// @brief Jacobi algorithm for calculating the singular vector decomposition of a 3x3 matrix
 void jacobiSVD3(float* A,float* U,float* V){
     for(int i=0;i<9;i++){
         U[i]=A[i];
