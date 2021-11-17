@@ -61,11 +61,11 @@ float dotprod(float* vector,float* vector2,int len){
 /// is upper triangular. See the documentation for the analogous function in R
 /// (https://www.rdocumentation.org/packages/pracma/versions/1.9.9/topics/qrSolve)
 ///
-/// @param [out] X
-/// @param [in] A -
-/// @param [in] b is a numeric vector of length 4
-/// @param [in] len -
-/// @param [in] len2
+/// @param [out] X is treated in the code as a 4x4 matrix
+/// @param [in] A is treated in the code as a 4 x len matrix
+/// @param [in] b is treated in the code as a 4 x len matrix
+/// @param [in] len is 4 in the example project
+/// @param [in] len2 is 4 in the example project
 void qrsolve(float* X,float* A,float* b,int len,int len2){
     //first column
     float* Q=new float[4*len];
