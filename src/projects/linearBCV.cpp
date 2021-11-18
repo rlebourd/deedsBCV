@@ -77,7 +77,7 @@ int main (int argc, char * const argv[]) {
         .grid_spacing{7,6,5,4},
         .search_radius{5,4,3,2},
         .quantisation{4,3,2,1},
-        .levels{4}
+        .levels = 4,
     };
     parseCommandLine(args, argc, argv);
     
@@ -143,11 +143,11 @@ int main (int argc, char * const argv[]) {
         im1[i]-=thresholdM;
     }
     
-	float *warped1=new float[m*n*o];
+    float *warped1=new float[m*n*o];
     float *warped2=new float[m*n*o];
-    
-	int step1; int hw1; float quant1;
-	
+
+    int step1; int hw1; float quant1;
+
     vector<int> mind_step;
     for(int i=0;i<args.quantisation.size();i++){
         mind_step.push_back(floor(0.5f*(float)args.quantisation[i]+1.0f));
@@ -162,12 +162,10 @@ int main (int argc, char * const argv[]) {
     uint64_t* im1_mind=new uint64_t[m*n*o];
     uint64_t* im1b_mind=new uint64_t[m*n*o];
     uint64_t* warped_mind=new uint64_t[m*n*o];
-	
-	gettimeofday(&time1a, NULL);
-    float timeDataSmooth=0;
-	//==========================================================================================
-	//==========================================================================================
-	for(int level=0;level<args.levels;level++){
+
+    //==========================================================================================
+    //==========================================================================================
+    for(int level=0;level<args.levels;level++){
         quant1=args.quantisation[level];
         step1=args.grid_spacing[level];
         hw1=args.search_radius[level];
@@ -178,98 +176,40 @@ int main (int argc, char * const argv[]) {
         warpAffine(warped2,im1b,Xinv,m,n,o);
         warpAffine(warped1,im1,Xprev,m,n,o);
 
-        
         float prev=mind_step[max(level-1,0)];
         float curr=mind_step[level];
-        
-        float timeMIND=0; float timeSmooth=0; float timeData=0; float timeTrans=0;
-		
+        		
         if(level==0|prev!=curr){
-            gettimeofday(&time1, NULL);
             descriptor(im1_mind,im1,m,n,o,mind_step[level]);//max(min(quant1,2.0f),1.0f)
             descriptor(im1b_mind,im1b,m,n,o,mind_step[level]);
-            gettimeofday(&time2, NULL);
-            timeMIND+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
-		}
-		
-		int len3=pow(hw1*2+1,3);
-		int m1=m/step1; int n1=n/step1; int o1=o/step1; int sz1=m1*n1*o1;
-        
+        }
+
+        int len3=pow(hw1*2+1,3);
+        int m1=m/step1; int n1=n/step1; int o1=o/step1; int sz1=m1*n1*o1;
+
         float* costall=new float[sz1*len3]; float* costall2=new float[sz1*len3];
-		
-        //cout<<"==========================================================\n";
-		//cout<<"Level "<<level<<" grid="<<step1<<" hw="<<hw1<<" quant="<<quant1<<"\n";
-		//cout<<"==========================================================\n";
-		
+
         //FULL-REGISTRATION FORWARDS
-        gettimeofday(&time1, NULL);
-        gettimeofday(&time2, NULL);
-		timeTrans+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
-        cout<<"T"<<flush;
-        gettimeofday(&time1, NULL);
-		descriptor(warped_mind,warped1,m,n,o,mind_step[level]);
-
-        gettimeofday(&time2, NULL);
-		timeMIND+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
-        cout<<"M"<<flush;
-        gettimeofday(&time1, NULL);
+        descriptor(warped_mind,warped1,m,n,o,mind_step[level]);
         dataCostCL((unsigned long*)im1b_mind,(unsigned long*)warped_mind,costall,m,n,o,len3,step1,hw1,quant1,alpha,RAND_SAMPLES);
-        gettimeofday(&time2, NULL);
 
-		timeData+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
-        cout<<"D"<<flush;
-        gettimeofday(&time1, NULL);
-        gettimeofday(&time2, NULL);
-		timeSmooth+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
-        cout<<"S"<<flush;
-		
         //FULL-REGISTRATION BACKWARDS
-        gettimeofday(&time1, NULL);
-		gettimeofday(&time2, NULL);
-		timeTrans+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
-        cout<<"T"<<flush;
-        gettimeofday(&time1, NULL);
-		descriptor(warped_mind,warped2,m,n,o,mind_step[level]);
-
-        gettimeofday(&time2, NULL);
-		timeMIND+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
-        cout<<"M"<<flush;
-        gettimeofday(&time1, NULL);
+        descriptor(warped_mind,warped2,m,n,o,mind_step[level]);
         dataCostCL((unsigned long*)im1_mind,(unsigned long*)warped_mind,costall2,m,n,o,len3,step1,hw1,quant1,alpha,RAND_SAMPLES);
-        gettimeofday(&time2, NULL);
-		timeData+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
-        cout<<"DS\n"<<flush;
-        gettimeofday(&time1, NULL);
         estimateAffine2(X,Xprev,im1b,im1,costall,costall2,step1,quant1,hw1);
-
-        gettimeofday(&time2, NULL);
-		timeSmooth+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
-        //cout<<"S"<<flush;
-		
-        printf("t: MIND=%2.2f, data=%2.2f, affine=%2.2f, speed=%2.2e dof/s\n",timeMIND,timeData,timeSmooth,2.0*(float)sz1*(float)len3/(timeData+timeSmooth));
-        
-        gettimeofday(&time1, NULL);
-
-        gettimeofday(&time2, NULL);
         
         for(int i=0;i<16;i++){
             Xprev[i]=X[i];
         }
 
-        
-        timeDataSmooth+=(timeSmooth+timeData+timeMIND+timeTrans);
-        
         delete[] costall; delete[] costall2;
 		
 	}
     delete[] im1_mind;
     delete[] im1b_mind;
-	//==========================================================================================
-	//==========================================================================================
-	
-    gettimeofday(&time2a, NULL);
-	float timeALL=time2a.tv_sec+time2a.tv_usec/1e6-(time1a.tv_sec+time1a.tv_usec/1e6);
     
+    //==========================================================================================
+    //==========================================================================================
     
     string outputfile;
     outputfile.append(args.output_stem);
@@ -298,19 +238,12 @@ int main (int argc, char * const argv[]) {
         
         warpAffineS(segw,seg2,X,zero,zero,zero);
         
-        
         string outputseg;
         outputseg.append(args.output_stem);
         outputseg.append("_deformed_seg.nii.gz");
-        
-        
-        
+
         gzWriteSegment(outputseg,segw,header,m,n,o,1);
     }
   
-    
-	cout<<"Finished. Total time: "<<timeALL<<" sec. ("<<timeDataSmooth<<" sec. for MIND+data+affine+trans)\n";
-	
-	
-	return 0;
+    return 0;
 }
