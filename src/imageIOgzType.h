@@ -6,18 +6,20 @@
 #ifndef IMAGE_IOGZ_TYPE_H_INCLUDED
 #define IMAGE_IOGZ_TYPE_H_INCLUDED
 
-void writeNifti(string filestr,float* vol,char* header,int m,int n,int o,int k);
+#include <string>
 
-void writeSegment(string filestr,short* vol,char* header,int m,int n,int o);
+void writeNifti(std::string filestr,float* vol,char* header,int m,int n,int o,int k);
 
-void gzWriteNifti(string filestr,float* data,char* header,int m,int n,int o,int p);
+void writeSegment(std::string filestr,short* vol,char* header,int m,int n,int o);
 
-void gzWriteSegment(string filestr,short* data,char* header,int m,int n,int o,int p);
+void gzWriteNifti(std::string filestr,float* data,char* header,int m,int n,int o,int p);
+
+void gzWriteSegment(std::string filestr,short* data,char* header,int m,int n,int o,int p);
 
 template <typename Type>
-void readNifti(string filestr,Type*& vol,char*& header,int& m,int& n,int& o,int& p){
+void readNifti(std::string filestr,Type*& vol,char*& header,int& m,int& n,int& o,int& p){
     
-    //convert input string into char* array
+    //convert input std::string into char* array
     char* filename=new char[filestr.size()+1];
     copy(filestr.begin(),filestr.end(),filename);
     filename[filestr.size()]='\0';
@@ -116,7 +118,7 @@ void readNifti(string filestr,Type*& vol,char*& header,int& m,int& n,int& o,int&
 }
 
 template <typename TypeFO>
-void writeOutput(TypeFO* data,string filestr,int length){
+void writeOutput(TypeFO* data,std::string filestr,int length){
     //opens file for binary-output
     char* filename=new char[filestr.size()+1];
     copy(filestr.begin(),filestr.end(),filename);
@@ -127,8 +129,8 @@ void writeOutput(TypeFO* data,string filestr,int length){
 }
 
 template <typename TypeF>
-vector<TypeF> readFile(string filestr){
-    //convert input string into char* array
+vector<TypeF> readFile(std::string filestr){
+    //convert input std::string into char* array
     char* filename=new char[filestr.size()+1];
     copy(filestr.begin(),filestr.end(),filename);
     filename[filestr.size()]='\0';

@@ -1,4 +1,6 @@
 #include "QRsolve.h"
+#include <math.h>
+#include <algorithm>
 
 float norm(float* vector,int len){
     float n=0;
@@ -267,7 +269,7 @@ void affineRobust(float* RT,float* pts1,float* pts2,int len){
             err[l]=pow(y-pts2[l],2)+pow(x-pts2[l+len],2)+pow(z-pts2[l+len*2],2);
             err2[l]=err[l];
         }
-        nth_element(err,err+len/2,err+len);
+        std::nth_element(err,err+len/2,err+len);
         float median=err[len/2];
         int count=0;
         for(int i=0;i<len;i++){

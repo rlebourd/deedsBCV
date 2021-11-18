@@ -1,4 +1,7 @@
 #include "primsMST.h"
+#include <math.h>
+#include <vector>
+#include <sys/time.h>
 
 struct Edge
 {

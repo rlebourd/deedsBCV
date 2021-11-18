@@ -1,4 +1,9 @@
 #include "transformations.h"
+#include <math.h>
+#include <algorithm>
+#include <iostream>
+
+using namespace std;
 
 void interp3(float* interp,float* input,float* x1,float* y1,float* z1,int m,int n,int o,int m2,int n2,int o2,bool flag){
 	for(int k=0;k<o;k++){
@@ -10,14 +15,14 @@ void interp3(float* interp,float* input,float* x1,float* y1,float* z1,int m,int 
 				if(flag){
 					x+=j; y+=i; z+=k;
 				}
-				interp[i+j*m+k*m*n]=(1.0-dx)*(1.0-dy)*(1.0-dz)*input[min(max(y,0),m2-1)+min(max(x,0),n2-1)*m2+min(max(z,0),o2-1)*m2*n2]+
-				(1.0-dx)*dy*(1.0-dz)*input[min(max(y+1,0),m2-1)+min(max(x,0),n2-1)*m2+min(max(z,0),o2-1)*m2*n2]+
-				dx*(1.0-dy)*(1.0-dz)*input[min(max(y,0),m2-1)+min(max(x+1,0),n2-1)*m2+min(max(z,0),o2-1)*m2*n2]+
-				(1.0-dx)*(1.0-dy)*dz*input[min(max(y,0),m2-1)+min(max(x,0),n2-1)*m2+min(max(z+1,0),o2-1)*m2*n2]+
-				dx*dy*(1.0-dz)*input[min(max(y+1,0),m2-1)+min(max(x+1,0),n2-1)*m2+min(max(z,0),o2-1)*m2*n2]+
-				(1.0-dx)*dy*dz*input[min(max(y+1,0),m2-1)+min(max(x,0),n2-1)*m2+min(max(z+1,0),o2-1)*m2*n2]+
-				dx*(1.0-dy)*dz*input[min(max(y,0),m2-1)+min(max(x+1,0),n2-1)*m2+min(max(z+1,0),o2-1)*m2*n2]+
-				dx*dy*dz*input[min(max(y+1,0),m2-1)+min(max(x+1,0),n2-1)*m2+min(max(z+1,0),o2-1)*m2*n2];
+				interp[i+j*m+k*m*n]=(1.0-dx)*(1.0-dy)*(1.0-dz)*input[std::min(std::max(y,0),m2-1)+std::min(std::max(x,0),n2-1)*m2+std::min(std::max(z,0),o2-1)*m2*n2]+
+				(1.0-dx)*dy*(1.0-dz)*input[std::min(std::max(y+1,0),m2-1)+std::min(std::max(x,0),n2-1)*m2+std::min(std::max(z,0),o2-1)*m2*n2]+
+				dx*(1.0-dy)*(1.0-dz)*input[std::min(std::max(y,0),m2-1)+std::min(std::max(x+1,0),n2-1)*m2+std::min(std::max(z,0),o2-1)*m2*n2]+
+				(1.0-dx)*(1.0-dy)*dz*input[std::min(std::max(y,0),m2-1)+std::min(std::max(x,0),n2-1)*m2+std::min(std::max(z+1,0),o2-1)*m2*n2]+
+				dx*dy*(1.0-dz)*input[std::min(std::max(y+1,0),m2-1)+std::min(std::max(x+1,0),n2-1)*m2+std::min(std::max(z,0),o2-1)*m2*n2]+
+				(1.0-dx)*dy*dz*input[std::min(std::max(y+1,0),m2-1)+std::min(std::max(x,0),n2-1)*m2+std::min(std::max(z+1,0),o2-1)*m2*n2]+
+				dx*(1.0-dy)*dz*input[std::min(std::max(y,0),m2-1)+std::min(std::max(x+1,0),n2-1)*m2+std::min(std::max(z+1,0),o2-1)*m2*n2]+
+				dx*dy*dz*input[std::min(std::max(y+1,0),m2-1)+std::min(std::max(x+1,0),n2-1)*m2+std::min(std::max(z+1,0),o2-1)*m2*n2];
 			}
 		}
 	}
@@ -40,11 +45,11 @@ void filter1(float* imagein,float* imageout,int m,int n,int o,float* filter,int 
 				for(f=0;f<length;f++){
 					//replicate-padding
 					if(dim==1)
-						imageout[i+j*m+k*m*n]+=filter[f]*imagein[max(min(i+f-hw,m-1),0)+j*m+k*m*n]; 
+						imageout[i+j*m+k*m*n]+=filter[f]*imagein[std::max(std::min(i+f-hw,m-1),0)+j*m+k*m*n];
 					if(dim==2)
-						imageout[i+j*m+k*m*n]+=filter[f]*imagein[i+max(min(j+f-hw,n-1),0)*m+k*m*n]; 
+						imageout[i+j*m+k*m*n]+=filter[f]*imagein[i+std::max(std::min(j+f-hw,n-1),0)*m+k*m*n];
 					if(dim==3)
-						imageout[i+j*m+k*m*n]+=filter[f]*imagein[i+j*m+max(min(k+f-hw,o-1),0)*m*n]; 
+						imageout[i+j*m+k*m*n]+=filter[f]*imagein[i+j*m+std::max(std::min(k+f-hw,o-1),0)*m*n];
 				}
 			}
 		}

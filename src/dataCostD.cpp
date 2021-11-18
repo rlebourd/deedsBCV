@@ -1,4 +1,6 @@
 #include "dataCostD.h"
+#include <math.h>
+#include <iostream>
 
 void interp3xyz(float* datai,float* data,float* datax,float* datay,int len1,int len2){
     //x-interp
@@ -108,7 +110,7 @@ void interp3xyzB(float* datai,float* data,float* datax,float* datay,int len1,int
 
 
 void dataCostCL(unsigned long* data,unsigned long* data2,float* results,int m,int n,int o,int len2,int step1,int hw,float quant,float alpha,int randnum){
-    cout<<"d"<<flush;
+    std::cout<<"d"<<std::flush;
     
     int len=hw*2+1;
     len2=pow(hw*2+1,3);
@@ -134,7 +136,7 @@ void dataCostCL(unsigned long* data,unsigned long* data2,float* results,int m,in
     for(int k=0;k<op;k++){
         for(int j=0;j<np;j++){
             for(int i=0;i<mp;i++){
-                data2p[i+j*mp+k*mp*np]=data2[max(min(i-pad1,m-1),0)+max(min(j-pad1,n-1),0)*m+max(min(k-pad1,o-1),0)*m*n];
+                data2p[i+j*mp+k*mp*np]=data2[std::max(std::min(i-pad1,m-1),0)+std::max(std::min(j-pad1,n-1),0)*m+std::max(std::min(k-pad1,o-1),0)*m*n];
             }
         }
     }
@@ -255,7 +257,7 @@ void warpAffineS(short* warped,short* input,float* X,float* u1,float* v1,float* 
                 int x=round(x1); int y=round(y1);  int z=round(z1);
                 
                 //if(y>=0&x>=0&z>=0&y<m&x<n&z<o){
-                    warped[i+j*m+k*m*n]=input[min(max(y,0),m-1)+min(max(x,0),n-1)*m+min(max(z,0),o-1)*m*n];
+                    warped[i+j*m+k*m*n]=input[std::min(std::max(y,0),m-1)+std::min(std::max(x,0),n-1)*m+std::min(std::max(z,0),o-1)*m*n];
                 //}
                 //else{
                 //    warped[i+j*m+k*m*n]=0;

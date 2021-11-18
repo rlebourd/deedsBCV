@@ -1,5 +1,7 @@
 #ifndef PARSE_ARGUMENTS_H_INCLUDED
-#define
+#define PARSE_ARGUMENTS_H_INCLUDED
+
+struct parameters; // forward declaration of parameters
 
 char *realpathEx(const char *path, char *buff);
 

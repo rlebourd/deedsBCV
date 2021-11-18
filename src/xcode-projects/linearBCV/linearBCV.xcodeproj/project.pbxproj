@@ -7,7 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B96DE23B2745D4CB0099443C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE23A2745D4CB0099443C /* main.cpp */; };
+		B96DE25C2745D5220099443C /* affineLTS1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE2542745D5220099443C /* affineLTS1.cpp */; };
+		B96DE2672745D54C0099443C /* linearBCV.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE2612745D54C0099443C /* linearBCV.cpp */; };
+		B96DE2722745D7AE0099443C /* regularisation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE26A2745D7AD0099443C /* regularisation.cpp */; };
+		B96DE2732745D7AE0099443C /* MINDSSCbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE26B2745D7AD0099443C /* MINDSSCbox.cpp */; };
+		B96DE2742745D7AE0099443C /* dataCostD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE26C2745D7AD0099443C /* dataCostD.cpp */; };
+		B96DE2752745D7AE0099443C /* QRsolve.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE26D2745D7AD0099443C /* QRsolve.cpp */; };
+		B96DE2762745D7AE0099443C /* primsMST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE26E2745D7AE0099443C /* primsMST.cpp */; };
+		B96DE2772745D7AE0099443C /* parseArguments.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE26F2745D7AE0099443C /* parseArguments.cpp */; };
+		B96DE2782745D7AE0099443C /* imageIOgzType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE2702745D7AE0099443C /* imageIOgzType.cpp */; };
+		B96DE2792745D7AE0099443C /* transformations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE2712745D7AE0099443C /* transformations.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +34,31 @@
 /* Begin PBXFileReference section */
 		B96DE2372745D4CB0099443C /* linearBCV */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = linearBCV; sourceTree = BUILT_PRODUCTS_DIR; };
 		B96DE23A2745D4CB0099443C /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		B96DE2512745D5220099443C /* affineLTS1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = affineLTS1.h; path = ../../../affineLTS1.h; sourceTree = "<group>"; };
+		B96DE2522745D5220099443C /* regularisation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = regularisation.h; path = ../../../regularisation.h; sourceTree = "<group>"; };
+		B96DE2532745D5220099443C /* transformations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = transformations.h; path = ../../../transformations.h; sourceTree = "<group>"; };
+		B96DE2542745D5220099443C /* affineLTS1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = affineLTS1.cpp; path = ../../../affineLTS1.cpp; sourceTree = "<group>"; };
+		B96DE2552745D5220099443C /* dataCostD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dataCostD.h; path = ../../../dataCostD.h; sourceTree = "<group>"; };
+		B96DE2562745D5220099443C /* imageIOgzType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imageIOgzType.h; path = ../../../imageIOgzType.h; sourceTree = "<group>"; };
+		B96DE2572745D5220099443C /* primsMST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = primsMST.h; path = ../../../primsMST.h; sourceTree = "<group>"; };
+		B96DE2582745D5220099443C /* readme.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = readme.md; path = ../../../readme.md; sourceTree = "<group>"; };
+		B96DE2592745D5220099443C /* QRsolve.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QRsolve.h; path = ../../../QRsolve.h; sourceTree = "<group>"; };
+		B96DE25A2745D5220099443C /* MINDSSCbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MINDSSCbox.h; path = ../../../MINDSSCbox.h; sourceTree = "<group>"; };
+		B96DE25B2745D5220099443C /* parseArguments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parseArguments.h; path = ../../../parseArguments.h; sourceTree = "<group>"; };
+		B96DE25E2745D54C0099443C /* deedsBCV0.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deedsBCV0.cpp; sourceTree = "<group>"; };
+		B96DE25F2745D54C0099443C /* preprocessAbdomen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = preprocessAbdomen.cpp; sourceTree = "<group>"; };
+		B96DE2602745D54C0099443C /* applyBCV.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = applyBCV.cpp; sourceTree = "<group>"; };
+		B96DE2612745D54C0099443C /* linearBCV.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = linearBCV.cpp; sourceTree = "<group>"; };
+		B96DE2622745D54C0099443C /* applyBCVfloat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = applyBCVfloat.cpp; sourceTree = "<group>"; };
+		B96DE2632745D54C0099443C /* diceMulti.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = diceMulti.cpp; sourceTree = "<group>"; };
+		B96DE26A2745D7AD0099443C /* regularisation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = regularisation.cpp; path = ../../../regularisation.cpp; sourceTree = "<group>"; };
+		B96DE26B2745D7AD0099443C /* MINDSSCbox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MINDSSCbox.cpp; path = ../../../MINDSSCbox.cpp; sourceTree = "<group>"; };
+		B96DE26C2745D7AD0099443C /* dataCostD.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dataCostD.cpp; path = ../../../dataCostD.cpp; sourceTree = "<group>"; };
+		B96DE26D2745D7AD0099443C /* QRsolve.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = QRsolve.cpp; path = ../../../QRsolve.cpp; sourceTree = "<group>"; };
+		B96DE26E2745D7AE0099443C /* primsMST.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = primsMST.cpp; path = ../../../primsMST.cpp; sourceTree = "<group>"; };
+		B96DE26F2745D7AE0099443C /* parseArguments.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parseArguments.cpp; path = ../../../parseArguments.cpp; sourceTree = "<group>"; };
+		B96DE2702745D7AE0099443C /* imageIOgzType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imageIOgzType.cpp; path = ../../../imageIOgzType.cpp; sourceTree = "<group>"; };
+		B96DE2712745D7AE0099443C /* transformations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = transformations.cpp; path = ../../../transformations.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,9 +91,43 @@
 		B96DE2392745D4CB0099443C /* linearBCV */ = {
 			isa = PBXGroup;
 			children = (
+				B96DE2542745D5220099443C /* affineLTS1.cpp */,
+				B96DE25D2745D54C0099443C /* projects */,
+				B96DE2512745D5220099443C /* affineLTS1.h */,
+				B96DE2552745D5220099443C /* dataCostD.h */,
+				B96DE2562745D5220099443C /* imageIOgzType.h */,
+				B96DE25A2745D5220099443C /* MINDSSCbox.h */,
+				B96DE25B2745D5220099443C /* parseArguments.h */,
+				B96DE26C2745D7AD0099443C /* dataCostD.cpp */,
+				B96DE2702745D7AE0099443C /* imageIOgzType.cpp */,
+				B96DE26B2745D7AD0099443C /* MINDSSCbox.cpp */,
+				B96DE26F2745D7AE0099443C /* parseArguments.cpp */,
+				B96DE26E2745D7AE0099443C /* primsMST.cpp */,
+				B96DE26D2745D7AD0099443C /* QRsolve.cpp */,
+				B96DE26A2745D7AD0099443C /* regularisation.cpp */,
+				B96DE2712745D7AE0099443C /* transformations.cpp */,
+				B96DE2572745D5220099443C /* primsMST.h */,
+				B96DE2592745D5220099443C /* QRsolve.h */,
+				B96DE2582745D5220099443C /* readme.md */,
+				B96DE2522745D5220099443C /* regularisation.h */,
+				B96DE2532745D5220099443C /* transformations.h */,
 				B96DE23A2745D4CB0099443C /* main.cpp */,
 			);
 			path = linearBCV;
+			sourceTree = "<group>";
+		};
+		B96DE25D2745D54C0099443C /* projects */ = {
+			isa = PBXGroup;
+			children = (
+				B96DE25E2745D54C0099443C /* deedsBCV0.cpp */,
+				B96DE25F2745D54C0099443C /* preprocessAbdomen.cpp */,
+				B96DE2602745D54C0099443C /* applyBCV.cpp */,
+				B96DE2612745D54C0099443C /* linearBCV.cpp */,
+				B96DE2622745D54C0099443C /* applyBCVfloat.cpp */,
+				B96DE2632745D54C0099443C /* diceMulti.cpp */,
+			);
+			name = projects;
+			path = ../../../projects;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -119,7 +187,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B96DE23B2745D4CB0099443C /* main.cpp in Sources */,
+				B96DE2782745D7AE0099443C /* imageIOgzType.cpp in Sources */,
+				B96DE2752745D7AE0099443C /* QRsolve.cpp in Sources */,
+				B96DE2672745D54C0099443C /* linearBCV.cpp in Sources */,
+				B96DE2732745D7AE0099443C /* MINDSSCbox.cpp in Sources */,
+				B96DE25C2745D5220099443C /* affineLTS1.cpp in Sources */,
+				B96DE2772745D7AE0099443C /* parseArguments.cpp in Sources */,
+				B96DE2742745D7AE0099443C /* dataCostD.cpp in Sources */,
+				B96DE2762745D7AE0099443C /* primsMST.cpp in Sources */,
+				B96DE2792745D7AE0099443C /* transformations.cpp in Sources */,
+				B96DE2722745D7AE0099443C /* regularisation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

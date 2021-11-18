@@ -1,4 +1,8 @@
 #include "MINDSSCbox.h"
+#include <stdint.h>
+#include <math.h>
+#include <sys/time.h>
+#include <algorithm>
 
 void boxfilter(float* input,float* temp1,float* temp2,int hw,int m,int n,int o){
     

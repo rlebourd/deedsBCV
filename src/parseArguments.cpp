@@ -1,4 +1,6 @@
 #include "parseArguments.h"
+#include <tuple>
+#include <map>
 
 char *realpathEx(const char *path, char *buff) {
     char *home;

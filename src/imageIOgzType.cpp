@@ -1,4 +1,5 @@
 #include "imageIOgzType.h"
+#include <string>
 
 void writeNifti(string filestr,float* vol,char* header,int m,int n,int o,int k){
     //convert input string into char* array

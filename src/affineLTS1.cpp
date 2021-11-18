@@ -1,4 +1,8 @@
 #include "affineLTS1.h"
+#include <math.h>
+#include <algorithm>
+
+using namespace std;
 
 void matmult(float* A,float* B,float *C){
     
