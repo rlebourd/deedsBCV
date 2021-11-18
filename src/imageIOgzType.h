@@ -7,6 +7,11 @@
 #define IMAGE_IOGZ_TYPE_H_INCLUDED
 
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <zlib.h>
+
+using namespace std;
 
 void writeNifti(std::string filestr,float* vol,char* header,int m,int n,int o,int k);
 

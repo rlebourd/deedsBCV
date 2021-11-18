@@ -3,6 +3,19 @@
 #include <sys/time.h>
 #include <algorithm>
 
+extern bool RIGID;
+extern int RAND_SAMPLES;
+extern int image_m;
+extern int image_n;
+extern int image_o;
+extern int image_d;
+extern float SSD0;
+extern float SSD1;
+extern float SSD2;
+extern float distfx_global;
+extern float beta;
+extern int qc;
+
 void messageDT(int ind,float* data,short* indout,int len1,float offsetx,float offsety,float offsetz){
     
     //int ind1=get_global_id(0)+start;

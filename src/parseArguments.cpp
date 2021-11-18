@@ -1,6 +1,10 @@
 #include "parseArguments.h"
 #include <tuple>
 #include <map>
+#include <string>
+#include <iostream>
+
+using namespace std;
 
 char *realpathEx(const char *path, char *buff) {
     char *home;
@@ -15,8 +19,8 @@ char *realpathEx(const char *path, char *buff) {
 
 void parseCommandLine(parameters& args,int argc, char * const argv[]){
     
-    typedef pair<char,int> val;
-    map<char,int> argin;
+    typedef std::pair<char,int> val;
+    std::map<char,int> argin;
     argin.insert(val('F',0));
     argin.insert(val('M',1));
     argin.insert(val('O',2));

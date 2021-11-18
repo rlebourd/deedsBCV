@@ -3,6 +3,8 @@
 #include <vector>
 #include <sys/time.h>
 
+using namespace std;
+
 struct Edge
 {
     double weight;
@@ -117,7 +119,7 @@ void primsGraph(float* im1,int* ordered,int* parents,float* edgemst,int step1,in
     
     int root=m/2+n/2*m+o/2*m*n;
     
-    vector<Edge> priority;
+    std::vector<Edge> priority;
     bool* vertices=new bool[num_vertices];
     int* level=new int[num_vertices];
     for(int i=0;i<num_vertices;i++){

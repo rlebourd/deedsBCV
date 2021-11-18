@@ -1,6 +1,22 @@
 #include "affineLTS1.h"
 #include <math.h>
 #include <algorithm>
+#include "QRsolve.h"
+
+extern bool RIGID;
+extern int RAND_SAMPLES;
+extern int image_m;
+extern int image_n;
+extern int image_o;
+extern int image_d;
+extern float SSD0;
+extern float SSD1;
+extern float SSD2;
+extern float distfx_global;
+extern float beta;
+extern int qc;
+
+extern float quantile(float* values,int length,float quant1);
 
 using namespace std;
 

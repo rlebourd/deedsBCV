@@ -4,6 +4,21 @@
 #include <sys/time.h>
 #include <algorithm>
 
+extern bool RIGID;
+extern int RAND_SAMPLES;
+extern int image_m;
+extern int image_n;
+extern int image_o;
+extern int image_d;
+extern float SSD0;
+extern float SSD1;
+extern float SSD2;
+extern float distfx_global;
+extern float beta;
+extern int qc;
+
+using namespace std;
+
 void boxfilter(float* input,float* temp1,float* temp2,int hw,int m,int n,int o){
     
     int sz=m*n*o;

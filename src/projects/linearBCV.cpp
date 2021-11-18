@@ -47,15 +47,6 @@ float quantile(float* values,int length,float quant1){
 }
 bool RIGID=false;
 
-
-struct parameters{
-    float alpha; int levels; bool segment,affine,rigid;
-    vector<int> grid_spacing; vector<int> search_radius;
-    vector<int> quantisation;
-    string fixed_file,moving_file,output_stem,moving_seg_file,affine_file,deformed_file;
-};
-
-
 #include "imageIOgzType.h"
 #include "transformations.h"
 #include "QRsolve.h"

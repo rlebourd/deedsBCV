@@ -17,6 +17,7 @@
 		B96DE2772745D7AE0099443C /* parseArguments.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE26F2745D7AE0099443C /* parseArguments.cpp */; };
 		B96DE2782745D7AE0099443C /* imageIOgzType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE2702745D7AE0099443C /* imageIOgzType.cpp */; };
 		B96DE2792745D7AE0099443C /* transformations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE2712745D7AE0099443C /* transformations.cpp */; };
+		B96DE27C2745E1660099443C /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B96DE27B2745E1660099443C /* libz.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -59,6 +60,7 @@
 		B96DE26F2745D7AE0099443C /* parseArguments.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parseArguments.cpp; path = ../../../parseArguments.cpp; sourceTree = "<group>"; };
 		B96DE2702745D7AE0099443C /* imageIOgzType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imageIOgzType.cpp; path = ../../../imageIOgzType.cpp; sourceTree = "<group>"; };
 		B96DE2712745D7AE0099443C /* transformations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = transformations.cpp; path = ../../../transformations.cpp; sourceTree = "<group>"; };
+		B96DE27B2745E1660099443C /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B96DE27C2745E1660099443C /* libz.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,6 +80,7 @@
 			children = (
 				B96DE2392745D4CB0099443C /* linearBCV */,
 				B96DE2382745D4CB0099443C /* Products */,
+				B96DE27A2745E04A0099443C /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -128,6 +132,14 @@
 			);
 			name = projects;
 			path = ../../../projects;
+			sourceTree = "<group>";
+		};
+		B96DE27A2745E04A0099443C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B96DE27B2745E1660099443C /* libz.tbd */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

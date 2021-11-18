@@ -1,6 +1,22 @@
 #include "dataCostD.h"
+#include "transformations.h"
 #include <math.h>
+#include <algorithm>
 #include <iostream>
+
+extern int RAND_SAMPLES;
+extern int image_m;
+extern int image_n;
+extern int image_o;
+extern int image_d;
+extern float SSD0;
+extern float SSD1;
+extern float SSD2;
+extern float distfx_global;
+extern float beta;
+extern int qc;
+
+using namespace std;
 
 void interp3xyz(float* datai,float* data,float* datax,float* datay,int len1,int len2){
     //x-interp
