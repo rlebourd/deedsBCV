@@ -55,23 +55,45 @@ bool RIGID=false;
 #include "dataCostD.h"
 #include "parseArguments.h"
 
+static void printUsage(){
+    cout<<"=============================================================\n";
+    cout<<"Usage (required input arguments):\n";
+    cout<<"./linearBCV -F fixed.nii.gz -M moving.nii.gz -O output\n";
+    cout<<"optional parameters:\n";
+    cout<<" -R <find rigid instead of affine transform> (default 0)\n";
+    cout<<" -l <number of levels> (default 4)\n";
+    cout<<" -G <grid spacing for each level> (default 7x6x5x4)\n";
+    cout<<" -L <maximum search radius - each level> (default 5x4x3x2)\n";
+    cout<<" -Q <quantisation of search step size> (default 4x3x2x1)\n";
+    cout<<"=============================================================\n";
+}
+
+static bool shouldPrintUsageBasedOnArgs(int argc, char * const argv[]){
+    return (argc<4||argv[1][1]=='h');
+}
+
+static bool fileHasCorrectExtension(std::string filename){
+    return filename.size() >= 2 && filename.substr(filename.size() - 2) == "gz";
+}
+
+static std::string getLastPathComponent(std::string filepath){
+    std::string forewardOrBackwardSlash{"/\\"};
+    const auto iter = filepath.find_last_of(forewardOrBackwardSlash);
+    if (iter != filepath.npos){
+        return filepath.substr(iter+1);
+    } else {
+        return filepath;
+    }
+}
+
 int main (int argc, char * const argv[]) {
     
     //PARSE INPUT ARGUMENTS
-    
-    if(argc<4||argv[1][1]=='h'){
-        cout<<"=============================================================\n";
-        cout<<"Usage (required input arguments):\n";
-        cout<<"./linearBCV -F fixed.nii.gz -M moving.nii.gz -O output\n";
-        cout<<"optional parameters:\n";
-        cout<<" -R <find rigid instead of affine transform> (default 0)\n";
-        cout<<" -l <number of levels> (default 4)\n";
-        cout<<" -G <grid spacing for each level> (default 7x6x5x4)\n";
-        cout<<" -L <maximum search radius - each level> (default 5x4x3x2)\n";
-        cout<<" -Q <quantisation of search step size> (default 4x3x2x1)\n";
-        cout<<"=============================================================\n";
+    if(shouldPrintUsageBasedOnArgs(argc, argv)){
+        printUsage();
         return 1;
     }
+    
     parameters args{
         //defaults
         .grid_spacing{7,6,5,4},
@@ -81,25 +103,16 @@ int main (int argc, char * const argv[]) {
     };
     parseCommandLine(args, argc, argv);
     
-    size_t split_fixed=args.fixed_file.find_last_of("/\\");
-    if(split_fixed==string::npos){
-        split_fixed=-1;
-    }
-    size_t split_moving=args.moving_file.find_last_of("/\\");
-    if(split_moving==string::npos){
-        split_moving=-1;
-    }
-    
-    if(args.fixed_file.substr(args.fixed_file.length()-2)!="gz"){
+    if(fileHasCorrectExtension(args.fixed_file) != true){
         cout<<"images must have nii.gz format\n";
         return -1;
     }
-    if(args.moving_file.substr(args.moving_file.length()-2)!="gz"){
+    if(fileHasCorrectExtension(args.moving_file) != true){
         cout<<"images must have nii.gz format\n";
         return -1;
     }
     
-    cout<<"Starting linear reg. of "<<args.fixed_file.substr(split_fixed+1)<<" and "<<args.moving_file.substr(split_moving+1)<<"\n";
+    cout<<"Starting linear registration of "<<getLastPathComponent(args.fixed_file)<<" and "<<getLastPathComponent(args.moving_file)<<"\n";
     cout<<"=============================================================\n";
 
     if(args.rigid){
@@ -111,9 +124,7 @@ int main (int argc, char * const argv[]) {
     
 	float alpha=1;
     //READ IMAGES and INITIALISE ARRAYS
-    
-    timeval time1,time2,time1a,time2a;
-    
+        
     RAND_SAMPLES=1; //fixed/efficient random sampling strategy
     
     float* im1; float* im1b;
@@ -178,8 +189,8 @@ int main (int argc, char * const argv[]) {
 
         float prev=mind_step[max(level-1,0)];
         float curr=mind_step[level];
-        		
-        if(level==0|prev!=curr){
+        
+        if(level==0 || prev!=curr){
             descriptor(im1_mind,im1,m,n,o,mind_step[level]);//max(min(quant1,2.0f),1.0f)
             descriptor(im1b_mind,im1b,m,n,o,mind_step[level]);
         }
@@ -203,7 +214,6 @@ int main (int argc, char * const argv[]) {
         }
 
         delete[] costall; delete[] costall2;
-		
 	}
     delete[] im1_mind;
     delete[] im1b_mind;
