@@ -72,12 +72,13 @@ int main (int argc, char * const argv[]) {
         cout<<"=============================================================\n";
         return 1;
     }
-    parameters args;
-    //defaults
-    args.grid_spacing={7,6,5,4};
-    args.search_radius={5,4,3,2};
-    args.quantisation={4,3,2,1};
-    args.levels=4;
+    parameters args{
+        //defaults
+        .grid_spacing{7,6,5,4},
+        .search_radius{5,4,3,2},
+        .quantisation{4,3,2,1},
+        .levels{4}
+    };
     parseCommandLine(args, argc, argv);
     
     size_t split_fixed=args.fixed_file.find_last_of("/\\");
@@ -88,7 +89,6 @@ int main (int argc, char * const argv[]) {
     if(split_moving==string::npos){
         split_moving=-1;
     }
-    
     
     if(args.fixed_file.substr(args.fixed_file.length()-2)!="gz"){
         cout<<"images must have nii.gz format\n";
@@ -107,7 +107,6 @@ int main (int argc, char * const argv[]) {
         RIGID=true;
     }
 
-	
 	qc=2;
     
 	float alpha=1;
@@ -168,7 +167,6 @@ int main (int argc, char * const argv[]) {
     float timeDataSmooth=0;
 	//==========================================================================================
 	//==========================================================================================
-	float* bench=new float[6*args.levels];
 	for(int level=0;level<args.levels;level++){
         quant1=args.quantisation[level];
         step1=args.grid_spacing[level];
@@ -253,8 +251,6 @@ int main (int argc, char * const argv[]) {
         gettimeofday(&time1, NULL);
 
         gettimeofday(&time2, NULL);
-        float timeMapping=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
-		
         
         for(int i=0;i<16;i++){
             Xprev[i]=X[i];
@@ -263,11 +259,11 @@ int main (int argc, char * const argv[]) {
         
         timeDataSmooth+=(timeSmooth+timeData+timeMIND+timeTrans);
         
-        delete costall; delete costall2;
+        delete[] costall; delete[] costall2;
 		
 	}
-    delete im1_mind;
-    delete im1b_mind;
+    delete[] im1_mind;
+    delete[] im1b_mind;
 	//==========================================================================================
 	//==========================================================================================
 	
