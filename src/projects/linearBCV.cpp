@@ -87,7 +87,6 @@ static std::string getLastPathComponent(std::string filepath){
 }
 
 int main (int argc, char * const argv[]) {
-    
     //PARSE INPUT ARGUMENTS
     if(shouldPrintUsageBasedOnArgs(argc, argv)){
         printUsage();

@@ -43,7 +43,6 @@ void qrsolve(float* X,float* A,float* b,int len,int len2){
     float r12=dotprod(Q,A+len,len);
     float r13=dotprod(Q,A+len*2,len);
     float r14=dotprod(Q,A+len*3,len);
-    //printf("r11: %f, r12: %f, r13: %f, r14: %f\n",r11,r12,r13,r14);
     
     //second column - misuse Q(:,2:4) for a2,a3,a4
     for(int i=0;i<len;i++){
@@ -57,7 +56,6 @@ void qrsolve(float* X,float* A,float* b,int len,int len2){
     }
     float r23=dotprod(Q+len,A+len*2,len);
     float r24=dotprod(Q+len,A+len*3,len);
-    //printf("r22: %f, r23: %f, r24: %f\n",r22,r23,r24);
     
     //third column
     for(int i=0;i<len;i++){
@@ -78,7 +76,6 @@ void qrsolve(float* X,float* A,float* b,int len,int len2){
     for(int i=0;i<len;i++){
         Q[i+len*3]=Q[i+len*3]/r44;
     }
-    //printf("r33: %f, r34: %f, r44: %f\n",r33,r34,r44);
     for(int j=0;j<len2;j++){
         float d1=dotprod(Q,b+j*len,len);
         float d2=dotprod(Q+len,b+j*len,len);
@@ -89,7 +86,6 @@ void qrsolve(float* X,float* A,float* b,int len,int len2){
         float x2=(d2-r23*x3-r24*x4)/r22;
         float x1=(d1-r12*x2-r13*x3-r14*x4)/r11;
         X[0+j*4]=x1; X[1+j*4]=x2; X[2+j*4]=x3; X[3+j*4]=x4;
-        //printf("x1: %f, x2: %f, x3: %f, x4: %f\n",x1,x2,x3,x4);
     }
     
 }
