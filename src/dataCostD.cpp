@@ -131,9 +131,7 @@ void dataCostCL(unsigned long* data,unsigned long* data2,float* results,int m,in
     int len=hw*2+1;
     len2=pow(hw*2+1,3);
     
-    int sz=m*n*o;
     int m1=m/step1; int n1=n/step1; int o1=o/step1;
-    int sz1=m1*n1*o1;
     
     //cout<<"len2: "<<len2<<" sz1= "<<sz1<<"\n";
     
@@ -221,24 +219,17 @@ void dataCostCL(unsigned long* data,unsigned long* data2,float* results,int m,in
         }
     }
     
-    
-    delete data2p;
-    
+    delete[] data2p;
     return;
-    
-    
 }
-
 
 void warpImageCL(float* warped,float* im1,float* im1b,float* u1,float* v1,float* w1){
     int m=image_m;
     int n=image_n;
     int o=image_o;
-    int sz=m*n*o;
     
     float ssd=0;
     float ssd0=0;
-    float ssd2=0;
     
     interp3(warped,im1,u1,v1,w1,m,n,o,m,n,o,true);
     
@@ -255,14 +246,12 @@ void warpImageCL(float* warped,float* im1,float* im1b,float* u1,float* v1,float*
     ssd0/=m*n*o;
     SSD0=ssd0;
     SSD1=ssd;
-    
 }
 
 void warpAffineS(short* warped,short* input,float* X,float* u1,float* v1,float* w1){
     int m=image_m;
     int n=image_n;
     int o=image_o;
-    int sz=m*n*o;
     for(int k=0;k<o;k++){
         for(int j=0;j<n;j++){
             for(int i=0;i<m;i++){
@@ -272,27 +261,19 @@ void warpAffineS(short* warped,short* input,float* X,float* u1,float* v1,float* 
                 float z1=(float)i*X[8]+(float)j*X[9]+(float)k*X[10]+(float)X[11]+w1[i+j*m+k*m*n];
                 int x=round(x1); int y=round(y1);  int z=round(z1);
                 
-                //if(y>=0&x>=0&z>=0&y<m&x<n&z<o){
-                    warped[i+j*m+k*m*n]=input[std::min(std::max(y,0),m-1)+std::min(std::max(x,0),n-1)*m+std::min(std::max(z,0),o-1)*m*n];
-                //}
-                //else{
-                //    warped[i+j*m+k*m*n]=0;
-                //}
+                warped[i+j*m+k*m*n]=input[std::min(std::max(y,0),m-1)+std::min(std::max(x,0),n-1)*m+std::min(std::max(z,0),o-1)*m*n];
             }
         }
     }
-    
-    
 }
+
 void warpAffine(float* warped,float* input,float* im1b,float* X,float* u1,float* v1,float* w1){
     int m=image_m;
     int n=image_n;
     int o=image_o;
-    int sz=m*n*o;
     
     float ssd=0;
     float ssd0=0;
-    float ssd2=0;
     
     for(int k=0;k<o;k++){
         for(int j=0;j<n;j++){
@@ -330,7 +311,4 @@ void warpAffine(float* warped,float* input,float* im1b,float* X,float* u1,float*
     ssd0/=m*n*o;
     SSD0=ssd0;
     SSD1=ssd;
-    
-    
 }
-

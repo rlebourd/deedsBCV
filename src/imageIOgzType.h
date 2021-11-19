@@ -113,7 +113,7 @@ void readNifti(std::string filestr,Type*& vol,char*& header,int& m,int& n,int& o
             printf("Datatype %d not supported. Exiting.\n",datatype[0]);
             exit(1);
     }
-    delete filecharptr;
+    delete[] filecharptr;
     
     //gzread(file,vol,sz*sizeof(Type));
     //vol=reinterpret_cast<Type*>(vol);
@@ -151,7 +151,7 @@ vector<TypeF> readFile(std::string filestr){
         for(int i=0;i<length;i++){
             invalues.push_back(floatptr[i]);
         }
-        delete charptr;
+        delete[] charptr;
     }
     else{
         cout<<"readFile error. Did not find "<<filestr<<"\n";
