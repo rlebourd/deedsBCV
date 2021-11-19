@@ -59,35 +59,48 @@ void warpShort(short* segw,short* seg1,float* X,int m,int n,int o){
 
 
 void warpAffine(float* warped,float* input,float* X,int m,int n,int o){
-    int m2=m; int n2=n; int o2=o;
     for(int k=0;k<o;k++){
         for(int j=0;j<n;j++){
             for(int i=0;i<m;i++){
+                // visit each voxel in the undeformed image (i.e. indexed by i, j, k)
                 
-                float y1=(float)i*X[0]+(float)j*X[1]+(float)k*X[2]+(float)X[3];
-                float x1=(float)i*X[4]+(float)j*X[5]+(float)k*X[6]+(float)X[7];
-                float z1=(float)i*X[8]+(float)j*X[9]+(float)k*X[10]+(float)X[11];
-                int x=floor(x1); int y=floor(y1);  int z=floor(z1);
-                float dx=x1-x; float dy=y1-y; float dz=z1-z;
+                // multiply the column vector of input indices by the affine
+                // transformation matrix to calculate the corresponding indices
+                // in the deformed image
+                const float y1=(float)i*X[0]+(float)j*X[1]+(float)k*X[2]+(float)X[3];
+                const float x1=(float)i*X[4]+(float)j*X[5]+(float)k*X[6]+(float)X[7];
+                const float z1=(float)i*X[8]+(float)j*X[9]+(float)k*X[10]+(float)X[11];
+                const int x=floor(x1);
+                const int y=floor(y1);
+                const int z=floor(z1);
                 
-                if(y<0|y>=m2-1|x<0|x>=n2-1|z<0|z>=o2-1){
+                if(y<0 || y>=m-1 || x<0 || x>=n-1 || z<0 || z>=o-1){
+                    // ignore indices on the boundary of the image
                     warped[i+j*m+k*m*n]=0.0;
                 }
                 else{
-                    warped[i+j*m+k*m*n]=(1.0-dx)*(1.0-dy)*(1.0-dz)*input[min(max(y,0),m2-1)+min(max(x,0),n2-1)*m2+min(max(z,0),o2-1)*m2*n2]+
-                    (1.0-dx)*dy*(1.0-dz)*input[min(max(y+1,0),m2-1)+min(max(x,0),n2-1)*m2+min(max(z,0),o2-1)*m2*n2]+
-                    dx*(1.0-dy)*(1.0-dz)*input[min(max(y,0),m2-1)+min(max(x+1,0),n2-1)*m2+min(max(z,0),o2-1)*m2*n2]+
-                    (1.0-dx)*(1.0-dy)*dz*input[min(max(y,0),m2-1)+min(max(x,0),n2-1)*m2+min(max(z+1,0),o2-1)*m2*n2]+
-                    dx*dy*(1.0-dz)*input[min(max(y+1,0),m2-1)+min(max(x+1,0),n2-1)*m2+min(max(z,0),o2-1)*m2*n2]+
-                    (1.0-dx)*dy*dz*input[min(max(y+1,0),m2-1)+min(max(x,0),n2-1)*m2+min(max(z+1,0),o2-1)*m2*n2]+
-                    dx*(1.0-dy)*dz*input[min(max(y,0),m2-1)+min(max(x+1,0),n2-1)*m2+min(max(z+1,0),o2-1)*m2*n2]+
-                    dx*dy*dz*input[min(max(y+1,0),m2-1)+min(max(x+1,0),n2-1)*m2+min(max(z+1,0),o2-1)*m2*n2];
+                    // deform the undeformed image
+                    const float dx=x1-x;
+                    const float dy=y1-y;
+                    const float dz=z1-z;
+                    
+                    auto index = [&](int x, int y, int z){
+                        return min(max(y,0),m-1) + min(max(x,0),n-1)*m + min(max(z,0),o-1)*m*n;
+                    };
+                    
+                    warped[index(i, j, k)]=
+                    input[index(x+0, y+0, z+0)]*(1.0-dx)*(1.0-dy)*(1.0-dz)+
+                    input[index(x+0, y+1, z+0)]*(1.0-dx)*dy*(1.0-dz)+
+                    input[index(x+1, y+0, z+0)]*dx*(1.0-dy)*(1.0-dz)+
+                    input[index(x+0, y+0, z+1)]*(1.0-dx)*(1.0-dy)*dz+
+                    input[index(x+1, y+1, z+0)]*dx*dy*(1.0-dz)+
+                    input[index(x+0, y+1, z+1)]*(1.0-dx)*dy*dz+
+                    input[index(x+1, y+0, z+1)]*dx*(1.0-dy)*dz+
+                    input[index(x+1, y+1, z+1)]*dx*dy*dz;
                 }
             }
         }
     }
-    
-    
 }
 
 
