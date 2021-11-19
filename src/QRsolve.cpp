@@ -35,38 +35,38 @@ float dotprod(float* vector,float* vector2,int len){
 
 void qrsolve(float* X,float* A,float* b,int len,int len2){
     //first column
-    float* Q=new float[4*len];
+    float Q[4*len];
     float r11=norm(A,len);
     for(int i=0;i<len;i++){
-        Q[i]=A[i]/r11;
+        Q[i]=A[i]/r11; // filling out row 1 of Q
     }
-    float r12=dotprod(Q,A+len,len);
-    float r13=dotprod(Q,A+len*2,len);
-    float r14=dotprod(Q,A+len*3,len);
+    float r12=dotprod(Q,A+len,len);   // indices 0-3 of Q, indices 4-7 of A
+    float r13=dotprod(Q,A+len*2,len); // indices 0-3 of Q, indices 8-11 of A
+    float r14=dotprod(Q,A+len*3,len); // indices 0-3 of Q, indices 12-15 of A
     
     //second column - misuse Q(:,2:4) for a2,a3,a4
     for(int i=0;i<len;i++){
-        Q[i+len]=A[i+len]-Q[i]*r12;
-        Q[i+len*2]=A[i+len*2]-Q[i]*r13;
-        Q[i+len*3]=A[i+len*3]-Q[i]*r14;
+        Q[i+len]=A[i+len]-Q[i]*r12;     // filling out row 2 of Q
+        Q[i+len*2]=A[i+len*2]-Q[i]*r13; // filling out row 3 of Q
+        Q[i+len*3]=A[i+len*3]-Q[i]*r14; // filling out row 4 of Q
     }
-    float r22=norm(Q+len,len);
+    float r22=norm(Q+len,len); // indices 4-7 of Q, indices 4-7 of Q
     for(int i=0;i<len;i++){
-        Q[i+len]=Q[i+len]/r22;
+        Q[i+len]=Q[i+len]/r22; // filling out row 2 of Q
     }
-    float r23=dotprod(Q+len,A+len*2,len);
-    float r24=dotprod(Q+len,A+len*3,len);
+    float r23=dotprod(Q+len,A+len*2,len); // indices 4-7 of Q, indices 8-11 of A
+    float r24=dotprod(Q+len,A+len*3,len); // indices 4-7 of Q, indices 12-15 of A
     
     //third column
     for(int i=0;i<len;i++){
-        Q[i+len*2]=A[i+len*2]-Q[i]*r13-Q[i+len]*r23;
-        Q[i+len*3]=A[i+len*3]-Q[i]*r14-Q[i+len]*r24;
+        Q[i+len*2]=A[i+len*2]-Q[i]*r13-Q[i+len]*r23; // filling out row 3 of Q
+        Q[i+len*3]=A[i+len*3]-Q[i]*r14-Q[i+len]*r24; // filling out row 4 of Q
     }
     float r33=norm(Q+len*2,len);
     for(int i=0;i<len;i++){
-        Q[i+len*2]=Q[i+len*2]/r33;
+        Q[i+len*2]=Q[i+len*2]/r33; // filling out row 3 of Q
     }
-    float r34=dotprod(Q+len*2,A+len*3,len);
+    float r34=dotprod(Q+len*2,A+len*3,len); // multiplying row 3 of Q and row 4 of A
     
     //fourth column
     for(int i=0;i<len;i++){
