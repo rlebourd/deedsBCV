@@ -40,6 +40,17 @@ namespace lin_alg {
             return matrix;
         }
         
+        static Matrix<Rows, Cols> onesMatrix(){
+            static_assert(Rows == Cols, "Rows must equal columns");
+            auto matrix = Matrix<Rows, Cols>{};
+            for (int i = 0; i < Rows; i++){
+                for (int j = 0; j < Cols; j++){
+                    matrix.at(i, j) = 1;
+                }
+            }
+            return matrix;
+        }
+        
         static Matrix<Rows, Cols> zeroMatrix(){
             return Matrix<Rows, Cols>{};
         }
@@ -68,6 +79,14 @@ namespace lin_alg {
             Matrix<Rows, Cols> matrix;
             for (int i = 0; i < Rows*Cols; i++){
                 matrix.elements[i] = scalar*elements[i];
+            }
+            return matrix;
+        }
+        
+        Matrix<Rows, Cols> addingToEachElement(double scalar) const {
+            Matrix<Rows, Cols> matrix;
+            for (int i = 0; i < Rows*Cols; i++){
+                matrix.elements[i] = scalar + elements[i];
             }
             return matrix;
         }
