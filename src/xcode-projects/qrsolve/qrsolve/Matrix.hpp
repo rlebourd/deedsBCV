@@ -91,6 +91,14 @@ namespace lin_alg {
             return matrix;
         }
         
+        Matrix<Rows, Cols> hadamardProduct(const Matrix<Rows, Cols> &rhs) const {
+            Matrix<Rows, Cols> matrix;
+            for (int i = 0; i < Rows*Cols; i++){
+                matrix.elements[i] = elements[i]*rhs.elements[i];
+            }
+            return matrix;
+        }
+        
         bool operator==(const Matrix<Rows, Cols> &rhs) const {
             for (int i = 0; i < Rows*Cols; i++){
                 if (elements[i] != rhs.elements[i]){
@@ -100,11 +108,11 @@ namespace lin_alg {
             return true;
         }
         
-        double &at(size_t row, size_t col) {
+        double &at(size_t row, size_t col = 0) {
             return elements[indexOfRowCol(row, col)];
         }
 
-        double at(size_t row, size_t col) const {
+        double at(size_t row, size_t col = 0) const {
             return elements[indexOfRowCol(row, col)];
         }
         
@@ -120,6 +128,22 @@ namespace lin_alg {
             return this->times(norm());
         }
 
+        Matrix<Rows, Cols> plus(const Matrix<Rows, Cols> &rhs) const {
+            Matrix<Rows, Cols> result = *this;
+            for (int i = 0; i < Rows*Cols; i++){
+                result.elements[i] = elements[i] + rhs.elements[i];
+            }
+            return norm;
+        }
+        
+        Matrix<Rows, Cols> floor() const {
+            Matrix<Rows, Cols> result = *this;
+            for (int i = 0; i < Rows*Cols; i++){
+                result.elements[i] = floor(elements[i]);
+            }
+            return norm;
+        }
+        
     private:
         size_t indexOfRowCol(size_t row, size_t col) const {
             return Cols*row + col;
