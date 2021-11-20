@@ -83,6 +83,14 @@ namespace lin_alg {
             return matrix;
         }
         
+        double dottedWith(const Matrix<Rows, Cols> &rhs) const {
+            double sum = 0;
+            for (int i = 0; i < Rows*Cols; i++){
+                sum += elements[i] * rhs.elements[i];
+            }
+            return sum;
+        }
+        
         Matrix<Rows, Cols> addingToEachElement(double scalar) const {
             Matrix<Rows, Cols> matrix;
             for (int i = 0; i < Rows*Cols; i++){
@@ -155,6 +163,7 @@ namespace lin_alg {
 
     using Vector3D  = Matrix<3, 1>;
     using Vector4D  = Matrix<4, 1>;
+    using Matrix2x2 = Matrix<2, 2>;
     using Matrix3x3 = Matrix<3, 3>;
     using Matrix4x4 = Matrix<4, 4>;
 
