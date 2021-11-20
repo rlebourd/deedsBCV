@@ -133,13 +133,7 @@ void dataCostCL(unsigned long* data,unsigned long* data2,float* results,int m,in
     
     int m1=m/step1; int n1=n/step1; int o1=o/step1;
     
-    //cout<<"len2: "<<len2<<" sz1= "<<sz1<<"\n";
-    
-    
-    
     int quant2=quant;
-    
-    //const int hw2=hw*quant2; == pad1
     
     int pad1=quant2*hw; int pad2=pad1*2;
     
@@ -173,27 +167,16 @@ void dataCostCL(unsigned long* data,unsigned long* data2,float* results,int m,in
     
     
     float maxsamp=ceil((float)step1/(float)skipx)*ceil((float)step1/(float)skipz)*ceil((float)step1/(float)skipy);
-    //printf("randnum: %d, maxsamp: %d ",randnum,(int)maxsamp);
-    
     
     float alphai=(float)step1/(alpha*(float)quant);
     
     float alpha1=0.5*alphai/(float)(maxsamp);
-    
-    //unsigned long buffer[1000];
-    
+        
 #pragma omp parallel for
     for(int z=0;z<o1;z++){
         for(int x=0;x<n1;x++){
             for(int y=0;y<m1;y++){
                 int z1=z*step1; int x1=x*step1; int y1=y*step1;
-                /*for(int k=0;k<step1;k++){
-                    for(int j=0;j<step1;j++){
-                        for(int i=0;i<step1;i++){
-                            buffer[i+j*step1+k*step1*step1]=data[i+y1+(j+x1)*m+(k+z1)*m*n];
-                        }
-                    }
-                }*/
                 
                 for(int l=0;l<len2;l++){
                     int out1=0;
@@ -203,9 +186,7 @@ void dataCostCL(unsigned long* data,unsigned long* data2,float* results,int m,in
                     for(int k=0;k<step1;k+=skipz){
                         for(int j=0;j<step1;j+=skipx){
                             for(int i=0;i<step1;i+=skipy){
-                                //unsigned int t=buffer[i+j*STEP+k*STEP*STEP]^buf2p[i+j*mp+k*mp*np];
-                                //out1+=(wordbits[t&0xFFFF]+wordbits[t>>16]);
-                                unsigned long t1=data[i+y1+(j+x1)*m+(k+z1)*m*n];//buffer[i+j*step1+k*step1*step1];
+                                unsigned long t1=data[i+y1+(j+x1)*m+(k+z1)*m*n];
                                 unsigned long t2=data2p[i+j*mp+k*mp*np+(y2+x2*mp+z2*mp*np)];
                                 out1+=__builtin_popcountll(t1^t2);
                             }
