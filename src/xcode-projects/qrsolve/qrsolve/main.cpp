@@ -16,60 +16,82 @@ lin_alg::Matrix4x4 qrsolve(lin_alg::Matrix4x4 &Ainv, const lin_alg::Matrix4x4 &A
     return Ainv;
 }
 
-mind::MRIImage warpAffine(mind::MRIImage input, lin_alg::Matrix4x4 affineMatrix){
-    auto output = input;
+float weightedAverageOfPixelAt(lin_alg::Vector4D xyz, mind::MRIImage input){
+    const float x1=xyz.at(0);
+    const float y1=xyz.at(1);
+    const float z1=xyz.at(2);
     
-    const int o = static_cast<int>(std::get<2>(output.dimensions()));
-    const int n = static_cast<int>(std::get<1>(output.dimensions()));
-    const int m = static_cast<int>(std::get<0>(output.dimensions()));
+    const int x=floor(x1);
+    const int y=floor(y1);
+    const int z=floor(z1);
 
-    for(int k=0; k<o; k++){
-        for(int j=0; j<n; j++){
-            for(int i=0; i<m; i++){
+    const float dx=x1-x; // in range [0, 1] and measures distance of index from nearest (lower bound) whole number
+    const float dy=y1-y; // in range [0, 1] so if dy ~ 0 then (1-dy) ~ 1, and y is closer to floor(y) than to floor(y)+1
+    const float dz=z1-z; // in range [0, 1] so if dz ~ 1 then (1-dz) ~ 0, and z is closer to floor(z)+1 than to floor(z)
+
+    return lin_alg::Matrix2x2{{
+        input.at(x+0, y+0, z+0), input.at(x+0, y+1, z+0),
+        input.at(x+1, y+0, z+0), input.at(x+1, y+1, z+0)
+    }}.dottedWith(lin_alg::Matrix2x2{{
+        (1.0-dx)*(1.0-dy)*(1.0-dz), (1.0-dx)*dy*(1.0-dz),
+        dx*(1.0-dy)*(1.0-dz), dx*dy*(1.0-dz)
+    }})
+    
+    +
+    
+    lin_alg::Matrix2x2{{
+        input.at(x+0, y+0, z+1), input.at(x+0, y+1, z+1),
+        input.at(x+1, y+0, z+1), input.at(x+1, y+1, z+1)
+    }}.dottedWith(lin_alg::Matrix2x2{{
+        (1.0-dx)*(1.0-dy)*dz, (1.0-dx)*dy*dz,
+        dx*(1.0-dy)*dz, dx*dy*dz
+    }});
+}
+
+mind::MRIImage warpAffine(mind::MRIImage deformedImage, lin_alg::Matrix4x4 affineMatrix){
+    auto originalImage = deformedImage;
+    
+    const int o = static_cast<int>(std::get<2>(originalImage.dimensions()));
+    const int n = static_cast<int>(std::get<1>(originalImage.dimensions()));
+    const int m = static_cast<int>(std::get<0>(originalImage.dimensions()));
+
+    for (int k=0; k<o; k++){
+        for (int j=0; j<n; j++){
+            for (int i=0; i<m; i++){
                 // visit each voxel in the undeformed image (i.e. indexed by i, j, k)
                 
                 // multiply the column vector of input indices by the affine
                 // transformation matrix to calculate the corresponding indices
                 // in the deformed image
-                auto originalIndices = lin_alg::Vector4D{{static_cast<double>(i),
-                                                          static_cast<double>(j),
-                                                          static_cast<double>(k),
-                                                          1}};
-                auto deformedIndices = affineMatrix.times(originalIndices);
-
-                const float x1=deformedIndices.at(0);
-                const float y1=deformedIndices.at(1);
-                const float z1=deformedIndices.at(2);
+                const auto originalIndices = lin_alg::Vector4D{{(double)i, (double)j, (double)k, 1}};
+                const auto deformedIndices = affineMatrix.times(originalIndices);
                 
-                const int x=floor(x1);
-                const int y=floor(y1);
-                const int z=floor(z1);
+                // would be nice to replace the if-else block below with:
+                // originalImage.at(originalIndices) = deformedImage.at(deformedIndices)
+                //
+                // i don't like this because it isolates the voxel-averaging algorithm
+                // within the image class, which seems inappropriate as it's not extensible
                 
-                if(y<0 || y>=m-1 || x<0 || x>=n-1 || z<0 || z>=o-1){
+                // or something like
+                // originalImage.at(originalIndices) = deformedImage.reduceForeachVoxelNear(0, deformedIndices, [](const VoxelProxy &vox){
+                //    return vox.value * vox.dx * vox.dy * vox.dz;
+                // });
+                //
+                // i like this because it's abstract, intuitive, and extensible
+                
+                if (deformedImage.pixelsAreOnOrOutsideBoundary(deformedIndices)){
                     // ignore indices on the boundary of the image
-                    output.at(i, j, k) = 0.0;
-                }
-                else{
+                    originalImage.at(i, j, k) = 0.0;
+                } else {
                     // deform the undeformed image
-                    const float dx=x1-x; // in range [0, 1] and measures distance of index from nearest (lower bound) whole number
-                    const float dy=y1-y; // in range [0, 1] so if dy ~ 0 then (1-dy) ~ 1, and y is closer to floor(y) than to floor(y)+1
-                    const float dz=z1-z; // in range [0, 1] so if dz ~ 1 then (1-dz) ~ 0, and z is closer to floor(z)+1 than to floor(z)
                     
                     // this is just computing the weighted average of the pixels near the real-valued index
-                    output.at(i, j, k) =
-                        input.at(x+0, y+0, z+0) * (1.0-dx)*(1.0-dy)*(1.0-dz) +
-                        input.at(x+0, y+1, z+0) * (1.0-dx)*dy*(1.0-dz) +
-                        input.at(x+1, y+0, z+0) * dx*(1.0-dy)*(1.0-dz) +
-                        input.at(x+0, y+0, z+1) * (1.0-dx)*(1.0-dy)*dz +
-                        input.at(x+1, y+1, z+0) * dx*dy*(1.0-dz) +
-                        input.at(x+0, y+1, z+1) * (1.0-dx)*dy*dz +
-                        input.at(x+1, y+0, z+1) * dx*(1.0-dy)*dz +
-                        input.at(x+1, y+1, z+1) * dx*dy*dz;
+                    originalImage.at(i, j, k) = weightedAverageOfPixelAt(deformedIndices, deformedImage);
                 }
             }
         }
     }
-    return output;
+    return originalImage;
 }
 
 int main(int argc, const char * argv[]) {
