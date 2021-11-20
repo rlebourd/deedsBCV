@@ -74,29 +74,30 @@ void warpAffine(float* warped,float* input,float* X,int m,int n,int o){
                 const int y=floor(y1);
                 const int z=floor(z1);
                 
+                auto index = [&](int x, int y, int z){
+                    return min(max(y,0),m-1) + min(max(x,0),n-1)*m + min(max(z,0),o-1)*m*n;
+                };
+
                 if(y<0 || y>=m-1 || x<0 || x>=n-1 || z<0 || z>=o-1){
                     // ignore indices on the boundary of the image
-                    warped[i+j*m+k*m*n]=0.0;
+                    warped[index(i, j, k)]=0.0;
                 }
                 else{
                     // deform the undeformed image
-                    const float dx=x1-x;
-                    const float dy=y1-y;
-                    const float dz=z1-z;
+                    const float dx=x1-x; // in range [0, 1] and measures distance of index from nearest (lower bound) whole number
+                    const float dy=y1-y; // in range [0, 1] so if dy ~ 0 then (1-dy) ~ 1, and y is closer to floor(y) than to floor(y)+1
+                    const float dz=z1-z; // in range [0, 1] so if dz ~ 1 then (1-dz) ~ 0, and z is closer to floor(z)+1 than to floor(z)
                     
-                    auto index = [&](int x, int y, int z){
-                        return min(max(y,0),m-1) + min(max(x,0),n-1)*m + min(max(z,0),o-1)*m*n;
-                    };
-                    
-                    warped[index(i, j, k)]=
-                    input[index(x+0, y+0, z+0)]*(1.0-dx)*(1.0-dy)*(1.0-dz)+
-                    input[index(x+0, y+1, z+0)]*(1.0-dx)*dy*(1.0-dz)+
-                    input[index(x+1, y+0, z+0)]*dx*(1.0-dy)*(1.0-dz)+
-                    input[index(x+0, y+0, z+1)]*(1.0-dx)*(1.0-dy)*dz+
-                    input[index(x+1, y+1, z+0)]*dx*dy*(1.0-dz)+
-                    input[index(x+0, y+1, z+1)]*(1.0-dx)*dy*dz+
-                    input[index(x+1, y+0, z+1)]*dx*(1.0-dy)*dz+
-                    input[index(x+1, y+1, z+1)]*dx*dy*dz;
+                    // this is just computing the weighted average of the pixels near the real-valued index
+                    warped[index(i, j, k)] =
+                        input[index(x+0, y+0, z+0)]*(1.0-dx)*(1.0-dy)*(1.0-dz)+
+                        input[index(x+0, y+1, z+0)]*(1.0-dx)*dy*(1.0-dz)+
+                        input[index(x+1, y+0, z+0)]*dx*(1.0-dy)*(1.0-dz)+
+                        input[index(x+1, y+1, z+0)]*dx*dy*(1.0-dz)+
+                        input[index(x+0, y+0, z+1)]*(1.0-dx)*(1.0-dy)*dz+
+                        input[index(x+0, y+1, z+1)]*(1.0-dx)*dy*dz+
+                        input[index(x+1, y+0, z+1)]*dx*(1.0-dy)*dz+
+                        input[index(x+1, y+1, z+1)]*dx*dy*dz;
                 }
             }
         }
