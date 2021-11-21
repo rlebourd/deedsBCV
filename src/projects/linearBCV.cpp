@@ -68,6 +68,13 @@ void printMatrix2D(PrintableType *mat){
     std::cout << "};" << std::endl;
 }
 
+template <typename PrintableType>
+void assertMatrixBeginsWith(PrintableType *mat, std::vector<PrintableType> prefix){
+    for (int i = 0; i < prefix.size(); i++){
+        assert(fabs((float)mat[i] - (float)prefix[i]) < 1e-3);
+    }
+}
+
 int main (int argc, char * const argv[]) {
     
     //PARSE INPUT ARGUMENTS
@@ -194,6 +201,9 @@ int main (int argc, char * const argv[]) {
         printMatrix2D<float, 4, 4>(Xinv);
         printMatrix2D<float, 1, 12>(warped1);
         printMatrix2D<float, 1, 12>(warped2);
+        assertMatrixBeginsWith<float>(Xinv, {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1});
+        assertMatrixBeginsWith<float>(warped1, {14, 20, 50, 76, 70, 0, 0, 29, 63, 31, 0, 57});
+        assertMatrixBeginsWith<float>(warped2, {0, 7, 14, 22, 20, 17, 46, 59, 37, 10, 14, 38});
         
         float prev=mind_step[max(level-1,0)];
         float curr=mind_step[level];
@@ -210,8 +220,10 @@ int main (int argc, char * const argv[]) {
 		
         printMatrix2D<uint64_t, 1, 12>(im1_mind);
         printMatrix2D<uint64_t, 1, 12>(im1b_mind);
-        
-		int len3=pow(hw1*2+1,3);
+        assertMatrixBeginsWith<uint64_t>(im1_mind, {37191014128057377, 36325792160801, 36325825743905, 252237900629970145, 108122712554114273, 36065118549738593, 36065116402254945, 36137684169688097, 1234752697828385, 37190981949359201, 37191016309097569, 37191016376206433});
+        assertMatrixBeginsWith<uint64_t>(im1b_mind, {37154833323539489, 37154816143670305, 37154816143658017, 109212401591651553, 109212401591649377, 109248616789443680, 109248616789443617, 109248582429705313, 109248578134737953, 109248575987254305, 111500375800939555, 111500375800939555});
+
+        int len3=pow(hw1*2+1,3);
 		int m1=m/step1; int n1=n/step1; int o1=o/step1; int sz1=m1*n1*o1;
         
         float* costall=new float[sz1*len3]; float* costall2=new float[sz1*len3];
@@ -229,6 +241,7 @@ int main (int argc, char * const argv[]) {
 		descriptor(warped_mind,warped1,m,n,o,mind_step[level]);
 
         printMatrix2D<uint64_t, 1, 12>(warped_mind);
+        assertMatrixBeginsWith<uint64_t>(warped_mind, {37191014128057377, 36325792160801, 36325825743905, 252237900629970145, 108122712554114273, 36065118549738593, 36065116402254945, 36137684169688097, 1234752697828385, 37190981949359201, 37191016309097569, 37191016376206433});
 
         gettimeofday(&time2, NULL);
 		timeMIND+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
@@ -238,8 +251,9 @@ int main (int argc, char * const argv[]) {
         gettimeofday(&time2, NULL);
 
         printMatrix2D<float, 1, 12>(costall);
-        
-		timeData+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+        assertMatrixBeginsWith<float>(costall, {10.0469, 10.0469, 10.0469, 10.0469, 9.40625, 9.48438, 13.0469, 13.4375, 13.4531, 13.0312, 14.0781, 10.0469});
+
+        timeData+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
         cout<<"D"<<flush;
         gettimeofday(&time1, NULL);
         gettimeofday(&time2, NULL);
@@ -255,6 +269,7 @@ int main (int argc, char * const argv[]) {
 		descriptor(warped_mind,warped2,m,n,o,mind_step[level]);
 
         printMatrix2D<uint64_t, 1, 12>(warped_mind);
+        assertMatrixBeginsWith<uint64_t>(warped_mind, {37154833323539489, 37154816143670305, 37154816143658017, 109212401591651553, 109212401591649377, 109248616789443680, 109248616789443617, 109248582429705313, 109248578134737953, 109248575987254305, 111500375800939555, 111500375800939555});
 
         gettimeofday(&time2, NULL);
 		timeMIND+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
@@ -263,7 +278,8 @@ int main (int argc, char * const argv[]) {
         dataCostCL((unsigned long*)im1_mind,(unsigned long*)warped_mind,costall2,m,n,o,len3,step1,hw1,quant1,alpha,RAND_SAMPLES);
         
         printMatrix2D<float, 1, 12>(costall2);
-        
+        assertMatrixBeginsWith<float>(costall2, {10.8438, 10.8438, 10.8438, 10.8438, 10.5156, 9.9375, 10.8906, 13.75, 17.2188, 15.7969, 12.4531, 10.8438});
+
         gettimeofday(&time2, NULL);
 		timeData+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
         cout<<"DS\n"<<flush;
