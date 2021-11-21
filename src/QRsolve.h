@@ -3,7 +3,7 @@
 
 float norm(float* vector,int len);
 
-float dotprod(float* vector,float* vector2,int len);
+float dotprod(const float* vector,const float* vector2,int len);
 
 /// @brief Finds the solution to a system of linear equations
 ///
@@ -16,7 +16,7 @@ float dotprod(float* vector,float* vector2,int len);
 /// @param [in] A is the 4x4 matrix to invert
 /// @param [in] b is the identity matrix in the examples
 ///
-void qrsolve(float* X,float* A,float* b,int len,int len2);
+void qrsolve(float* X,float* A,const float* b,int len,int len2);
 
 void jacobiSVD3(float* A,float* U,float* V);
 

@@ -25,7 +25,7 @@ float norm(float* vector,int len){
     return sqrt(n);
 }
 
-float dotprod(float* vector,float* vector2,int len){
+float dotprod(const float* vector,const float* vector2,int len){
     float dot=0;
     for(int i=0;i<len;i++){
         dot+=vector[i]*vector2[i];
@@ -33,7 +33,7 @@ float dotprod(float* vector,float* vector2,int len){
     return dot;
 }
 
-void qrsolve(float* X,float* A,float* b,int len,int len2){
+void qrsolve(float* X,float* A,const float* b,int len,int len2){
     //first column
     float Q[4*len];
     float r11=norm(A,len);
