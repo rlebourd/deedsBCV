@@ -89,9 +89,9 @@ void imshift(float* input,float* output,int dx,int dy,int dz,int m,int n,int o){
         for(int j=0;j<n;j++){
             for(int i=0;i<m;i++){
                 if(i+dy>=0&&i+dy<m&&j+dx>=0&&j+dx<n&&k+dz>=0&&k+dz<o)
-                output[i+j*m+k*m*n]=input[i+dy+(j+dx)*m+(k+dz)*m*n];
+                    output[i+j*m+k*m*n]=input[i+dy+(j+dx)*m+(k+dz)*m*n];
                 else
-                output[i+j*m+k*m*n]=input[i+j*m+k*m*n];
+                    output[i+j*m+k*m*n]=input[i+j*m+k*m*n];
             }
         }
     }
@@ -99,48 +99,48 @@ void imshift(float* input,float* output,int dx,int dy,int dz,int m,int n,int o){
 
 void distances(float* im1,float* d1,int m,int n,int o,int qs,int l){
     int sz1=m*n*o;
-	float* w1=new float[sz1];
-
+    float* w1=new float[sz1];
+    
     float* temp1=new float[sz1]; float* temp2=new float[sz1];
     int dx[6]={+qs,+qs,-qs,0,+qs,0};
-	int dy[6]={+qs,-qs,0,-qs,0,+qs};
-	int dz[6]={0,0,+qs,+qs,+qs,+qs};
+    int dy[6]={+qs,-qs,0,-qs,0,+qs};
+    int dz[6]={0,0,+qs,+qs,+qs,+qs};
     
-		imshift(im1,w1,dx[l],dy[l],dz[l],m,n,o);
-		for(int i=0;i<sz1;i++){
-			w1[i]=(w1[i]-im1[i])*(w1[i]-im1[i]);
-		}
-		boxfilter(w1,temp1,temp2,qs,m,n,o);
-		for(int i=0;i<sz1;i++){
-			d1[i+l*sz1]=w1[i];
-		}
-	
+    imshift(im1,w1,dx[l],dy[l],dz[l],m,n,o);
+    for(int i=0;i<sz1;i++){
+        w1[i]=(w1[i]-im1[i])*(w1[i]-im1[i]);
+    }
+    boxfilter(w1,temp1,temp2,qs,m,n,o);
+    for(int i=0;i<sz1;i++){
+        d1[i+l*sz1]=w1[i];
+    }
+    
     delete[] temp1; delete[] temp2; delete[] w1;
 }
 
 //__builtin_popcountll(left[i]^right[i]); absolute hamming distances
 void descriptor(uint64_t* mindq,float* im1,int m,int n,int o,int qs){
     //MIND with self-similarity context
-	const int sx[12]={-qs,0,-qs,0,0,+qs,0,0,0,-qs,0,0};
-	const int sy[12]={0,-qs,0,+qs,0,0,0,+qs,0,0,0,-qs};
-	const int sz[12]={0,0,0,0,-qs,0,-qs,0,-qs,0,-qs,0};
-	
-	const int index[12]={0,0,1,1,2,2,3,3,4,4,5,5};
-		
-	const int len1=6;
-	const int len2=12;
+    const int sx[12]={-qs,0,-qs,0,0,+qs,0,0,0,-qs,0,0};
+    const int sy[12]={0,-qs,0,+qs,0,0,0,+qs,0,0,0,-qs};
+    const int sz[12]={0,0,0,0,-qs,0,-qs,0,-qs,0,-qs,0};
+    
+    const int index[12]={0,0,1,1,2,2,3,3,4,4,5,5};
+    
+    const int len1=6;
+    const int len2=12;
     
     image_d=12;
     const int sz1=m*n*o;
     
     //============== DISTANCES USING BOXFILTER ===================
-	float* d1=new float[sz1*len1];
-
+    float* d1=new float[sz1*len1];
+    
 #pragma omp parallel for
     for(int l=0;l<len1;l++){
         distances(im1,d1,m,n,o,qs,l);
     }
-
+    
     //quantisation table
     const int val=6;
     
