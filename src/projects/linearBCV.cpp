@@ -75,8 +75,35 @@ void assertMatrixBeginsWith(PrintableType *mat, std::vector<PrintableType> prefi
     }
 }
 
+void demoWarpAffine(){
+    float A[4][4] = {
+        {10, 10, 10, 10},
+        {10, 10, 10, 0},
+        {10, 10, 0, 0},
+        {10, 0, 0, 0}
+    };
+    float B[4][4] = {
+        {0, 0, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    };
+    float Xform[4][4] = {
+        {2, 0, 0, 0},
+        {0, 1, 0, 0},
+        {0, 0, 1, 0},
+        {0, 0, 0, 1}
+    };
+    warpAffine((float *)B, (float *)A, (float *)Xform, 4, 4, 1);
+    
+    // B is now compressed by a factor of 1/2 in the horizontal direction
+    // compared to A. Therefore, the warpAffine function effectively applies
+    // the inverse of Xform to A to get B.
+}
+
 int main (int argc, char * const argv[]) {
     
+
     //PARSE INPUT ARGUMENTS
     
     if(argc<4||argv[1][1]=='h'){
@@ -195,8 +222,8 @@ int main (int argc, char * const argv[]) {
         float Xinv[16]; float Ident[16]={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
         qrsolve(Xinv,Xprev,Ident,4,4);
         
-        warpAffine(warped2,im1b,Xinv,m,n,o);
-        warpAffine(warped1,im1,Xprev,m,n,o);
+        warpAffine(warped2,im1b,Xinv,m,n,o); // applies X to im1b (fixed file)
+        warpAffine(warped1,im1,Xprev,m,n,o); // applies Xinv to im1 (moving file)
 
         printMatrix2D<float, 4, 4>(Xinv);
         printMatrix2D<float, 1, 12>(warped1);
