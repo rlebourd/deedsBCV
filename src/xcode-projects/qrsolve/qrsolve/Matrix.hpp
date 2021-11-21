@@ -18,10 +18,10 @@ namespace lin_alg {
     public:
         static_assert(Rows > 0, "Rows must be greater than zero");
         static_assert(Cols > 0, "Cols must be greater than zero");
-
+        
         Matrix(std::array<double, Rows*Cols> elems){
             for (int i = 0; i < Rows*Cols; i++){
-                elements[i] = elems.at(i);
+                elements[i] = static_cast<double>(elems.at(i));
             }
         }
 
