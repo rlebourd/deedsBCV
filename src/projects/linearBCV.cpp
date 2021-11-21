@@ -88,11 +88,18 @@ static std::string getLastPathComponent(std::string filepath){
 
 int main (int argc, char * const argv[]) {
     //PARSE INPUT ARGUMENTS
+    
+    // 1. validate inputs
     if(shouldPrintUsageBasedOnArgs(argc, argv)){
+        float Xinv[16]; float Ident[16]={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+        float Xprev[16]={1,2,3,4,0,1,10,100,1,2,1,6,7,10,0,1};
+        qrsolve(Xinv,Xprev,Ident,4,4);
+        matmult(Xinv, Xprev, Ident);
         printUsage();
         return 1;
     }
     
+    // 2. parse program's inputs
     parameters args{
         //defaults
         .grid_spacing{7,6,5,4},
@@ -111,9 +118,11 @@ int main (int argc, char * const argv[]) {
         return -1;
     }
     
+    // 3. print out that we're beginning registration
     cout<<"Starting linear registration of "<<getLastPathComponent(args.fixed_file)<<" and "<<getLastPathComponent(args.moving_file)<<"\n";
     cout<<"=============================================================\n";
 
+    // 4. various, apparently unrelated parameters are set
     if(args.rigid){
         cout<<"Searching only for rigid (6 parameter) transform\n";
         RIGID=true;
@@ -126,96 +135,111 @@ int main (int argc, char * const argv[]) {
         
     RAND_SAMPLES=1; //fixed/efficient random sampling strategy
     
-    float* im1; float* im1b;
+    // 5. read in the images from the specified files and validate that their sizes are compatible
+    float* movingImageData; float* fixedImageData;
     
     int M,N,O,P; //image dimensions
     
     //==ALWAYS ALLOCATE MEMORY FOR HEADER ===/
     char* header=new char[352];
     
-    readNifti(args.fixed_file,im1b,header,M,N,O,P);
+    readNifti(args.fixed_file,fixedImageData,header,M,N,O,P);
     image_m=M; image_n=N; image_o=O;
 
-    readNifti(args.moving_file,im1,header,M,N,O,P);
+    readNifti(args.moving_file,movingImageData,header,M,N,O,P);
     
-    if(M!=image_m|N!=image_n|O!=image_o){
-        cout<<"Inconsistent image sizes (must have same dimensions)\n";
+    if (M!=image_m|N!=image_n|O!=image_o){
+        cout<<"Inconsistent image sizes (must have same dimensions) " << M << " " << N << " " << " " << O << " and " << image_m << " " << image_n << " " << image_o << endl;
         return -1;
     }
+    cout<<"Consistent image sizes (must have same dimensions) " << M << " " << N << " " << " " << O << endl;
     
+    // 6. scale the image's intensity values by 1024 (for some reason this is needed for CTs)
     int m=image_m; int n=image_n; int o=image_o; int sz=m*n*o;
     
     //assume we are working with CT scans (add 1024 HU)
     float thresholdF=-1024; float thresholdM=-1024;
     
-    for(int i=0;i<sz;i++){
-        im1b[i]-=thresholdF;
-        im1[i]-=thresholdM;
+    for (int i=0;i<sz;i++){
+        fixedImageData[i]-=thresholdF;
+        movingImageData[i]-=thresholdM;
     }
     
-    float *warped1=new float[m*n*o];
-    float *warped2=new float[m*n*o];
-
-    int step1; int hw1; float quant1;
+    // 7.
+    float *movingImageDataWarped=new float[m*n*o];
+    float *fixedImageDataWarped=new float[m*n*o];
 
     vector<int> mind_step;
-    for(int i=0;i<args.quantisation.size();i++){
+    for (int i=0;i<args.quantisation.size();i++){
         mind_step.push_back(floor(0.5f*(float)args.quantisation[i]+1.0f));
+        // for quantisations {4, 3, 2, 1}, the mind_steps become {3, 2, 2, 1}
     }
     float* X=new float[4*4];
     
     float Xprev[16]={1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
-    for(int i=0;i<16;i++){
+    for (int i=0;i<16;i++){
         X[i]=Xprev[i];
     }
     
-    uint64_t* im1_mind=new uint64_t[m*n*o];
-    uint64_t* im1b_mind=new uint64_t[m*n*o];
-    uint64_t* warped_mind=new uint64_t[m*n*o];
+    uint64_t *movingImageMindDescData = new uint64_t[m*n*o];
+    uint64_t *fixedImageMindDescData = new uint64_t[m*n*o];
+    uint64_t *warpedImageMindDescData = new uint64_t[m*n*o];
 
     //==========================================================================================
     //==========================================================================================
-    for(int level=0;level<args.levels;level++){
-        quant1=args.quantisation[level];
-        step1=args.grid_spacing[level];
-        hw1=args.search_radius[level];
+    const float Ident[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+    float Xinv[16];
+    for (int level=0; level<args.levels; level++){
+        // initializes the parameters for the current iteration
+        const float quantisation = args.quantisation[level];
+        const int gridSpacing = args.grid_spacing[level];
+        const int searchRadius = args.search_radius[level];
 
-        float Xinv[16]; float Ident[16]={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+        // finds the matrix inverse of Xprev
         qrsolve(Xinv,Xprev,Ident,4,4);
         
-        warpAffine(warped2,im1b,Xinv,m,n,o);
-        warpAffine(warped1,im1,Xprev,m,n,o);
+        //
+        warpAffine(fixedImageDataWarped,fixedImageData,Xinv,m,n,o); // so now fixedImageDataWarped should be close to movingImageData
+        warpAffine(movingImageDataWarped,movingImageData,Xprev,m,n,o); // so now movingImageDataWarped should be close to fixedImageData
 
-        float prev=mind_step[max(level-1,0)];
-        float curr=mind_step[level];
+        // update descriptors
+        const float prevMindStep = mind_step[max(level-1, 0)];
+        const float currMindStep = mind_step[level];
         
-        if(level==0 || prev!=curr){
-            descriptor(im1_mind,im1,m,n,o,mind_step[level]);//max(min(quant1,2.0f),1.0f)
-            descriptor(im1b_mind,im1b,m,n,o,mind_step[level]);
+        if(level == 0 || prevMindStep != currMindStep){
+            // the descriptors are always calculated on the first iteration
+            // and then re-calculated whenever the "mind step" changes
+            
+            descriptor(movingImageMindDescData,movingImageData,m,n,o,currMindStep); // so now movingImageMindDescData contains descriptor data for movingImageData
+            descriptor(fixedImageMindDescData,fixedImageData,m,n,o,currMindStep); // so now fixedImageMindDescData contains descriptor data for fixedImageData
         }
 
-        int len3=pow(hw1*2+1,3);
-        int m1=m/step1; int n1=n/step1; int o1=o/step1; int sz1=m1*n1*o1;
-
-        float* costall=new float[sz1*len3]; float* costall2=new float[sz1*len3];
+        // forward and reverse registration
+        const int len3 = pow(searchRadius*2+1, 3); // (side length of each patch)^3 = volume of patch
+        const int m1 = m/gridSpacing; const int n1 = n/gridSpacing; const int o1 = o/gridSpacing; const int sz1 = m1*n1*o1;
 
         //FULL-REGISTRATION FORWARDS
-        descriptor(warped_mind,warped1,m,n,o,mind_step[level]);
-        dataCostCL((unsigned long*)im1b_mind,(unsigned long*)warped_mind,costall,m,n,o,len3,step1,hw1,quant1,alpha,RAND_SAMPLES);
+        float* costall = new float[sz1*len3];
+        descriptor(warpedImageMindDescData,movingImageDataWarped,m,n,o,currMindStep); // so now warpedImageMindDescData should contain descriptors that resemble those of the fixedImageMindDescData
+        dataCostCL((unsigned long*)fixedImageMindDescData,(unsigned long*)warpedImageMindDescData,costall,m,n,o,len3,gridSpacing,searchRadius,quantisation,alpha,RAND_SAMPLES);
 
         //FULL-REGISTRATION BACKWARDS
-        descriptor(warped_mind,warped2,m,n,o,mind_step[level]);
-        dataCostCL((unsigned long*)im1_mind,(unsigned long*)warped_mind,costall2,m,n,o,len3,step1,hw1,quant1,alpha,RAND_SAMPLES);
-        estimateAffine2(X,Xprev,im1b,im1,costall,costall2,step1,quant1,hw1);
+        float* costall2 = new float[sz1*len3];
+        descriptor(warpedImageMindDescData,fixedImageDataWarped,m,n,o,currMindStep); // so now warpedImageMindDescData should contain descriptors that resemble those of the movingImageMindDescData
+        dataCostCL((unsigned long*)movingImageMindDescData,(unsigned long*)warpedImageMindDescData,costall2,m,n,o,len3,gridSpacing,searchRadius,quantisation,alpha,RAND_SAMPLES);
         
-        for(int i=0;i<16;i++){
-            Xprev[i]=X[i];
-        }
+        estimateAffine2(X,Xprev,fixedImageData,movingImageData,costall,costall2,gridSpacing,quantisation,searchRadius);
+        
+        delete[] costall;
+        delete[] costall2;
 
-        delete[] costall; delete[] costall2;
+        // update the affine transformation matrix
+        for (int i=0; i<16; i++){
+            Xprev[i] = X[i];
+        }
 	}
-    delete[] im1_mind;
-    delete[] im1b_mind;
+    delete[] movingImageMindDescData;
+    delete[] fixedImageMindDescData;
     
     //==========================================================================================
     //==========================================================================================
@@ -227,7 +251,7 @@ int main (int argc, char * const argv[]) {
     ofstream matfile;
     matfile.open(outputfile);
     
-    for(int i=0;i<4;i++){
+    for (int i=0;i<4;i++){
         matfile<<X[i]<<"  "<<X[i+4]<<"  "<<X[i+8]<<"  "<<X[i+12]<<"\n";
         
         printf("%+4.3f | %+4.3f | %+4.3f | %+4.3f \n",X[i],X[i+4],X[i+8],X[i+12]);
@@ -235,7 +259,7 @@ int main (int argc, char * const argv[]) {
     matfile.close();
     
     // if SEGMENTATION of moving image is provided APPLY SAME TRANSFORM
-    if(args.segment){
+    if (args.segment){
         short* seg2;
         readNifti(args.moving_seg_file,seg2,header,M,N,O,P);
         
