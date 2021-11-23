@@ -34,13 +34,6 @@ struct mind_data{
     int ind_d1;
 };
 
-struct parameters{
-    float alpha; int levels; bool segment,affine,rigid;
-    vector<int> grid_spacing; vector<int> search_radius;
-    vector<int> quantisation;
-    string fixed_file,moving_file,output_stem,moving_seg_file,affine_file,deformed_file;
-};
-
 #include "imageIOgzType.h"
 #include "transformations.h"
 #include "primsMST.h"
@@ -48,6 +41,20 @@ struct parameters{
 #include "MINDSSCbox.h"
 #include "dataCostD.h"
 #include "parseArguments.h"
+
+float quantile(float* values,int length,float quant1){
+    float* values2=new float[length];
+    for(int i=0;i<length;i++){
+        values2[i]=values[i];
+    }
+    int quantind=length*min(max(quant1,0.01f),0.99f);
+    //printf("quantind: %d/%d\n",quantind,length);
+    nth_element(values2,values2+quantind,values2+length);
+    float med1=values2[quantind];
+    // delete values2;
+    return med1;
+}
+bool RIGID=false;
 
 
 int main (int argc, char * const argv[]) {
@@ -113,17 +120,17 @@ int main (int argc, char * const argv[]) {
 
 	RAND_SAMPLES=1; //fixed/efficient random sampling strategy
 	
-	float* im1; float* im1b;
+	float* movingImage; float* fixedImage;
     
 	int M,N,O,P; //image dimensions
     
     //==ALWAYS ALLOCATE MEMORY FOR HEADER ===/
 	char* header=new char[352];
     
-	readNifti(args.fixed_file,im1b,header,M,N,O,P);
+	readNifti(args.fixed_file,fixedImage,header,M,N,O,P);
     image_m=M; image_n=N; image_o=O;
 
-	readNifti(args.moving_file,im1,header,M,N,O,P);
+	readNifti(args.moving_file,movingImage,header,M,N,O,P);
 	
 
     if(M!=image_m|N!=image_n|O!=image_o){
@@ -137,8 +144,8 @@ int main (int argc, char * const argv[]) {
     float thresholdF=-1024; float thresholdM=-1024;
 
     for(int i=0;i<sz;i++){
-        im1b[i]-=thresholdF;
-        im1[i]-=thresholdM;
+        fixedImage[i]-=thresholdF;
+        movingImage[i]-=thresholdM;
     }
     
 	float *warped1=new float[m*n*o];
@@ -205,7 +212,7 @@ int main (int argc, char * const argv[]) {
 	}
 	
     float* warped0=new float[m*n*o];
-    warpAffine(warped0,im1,im1b,X,ux,vx,wx);
+    warpAffine(warped0, movingImage, fixedImage, X, ux, vx, wx);
     
 
     uint64_t* im1_mind=new uint64_t[m*n*o];
@@ -228,7 +235,7 @@ int main (int argc, char * const argv[]) {
         if(level==0|prev!=curr){
             gettimeofday(&time1, NULL);
             descriptor(im1_mind,warped0,m,n,o,mind_step[level]);//im1 affine
-            descriptor(im1b_mind,im1b,m,n,o,mind_step[level]);
+            descriptor(im1b_mind,fixedImage,m,n,o,mind_step[level]);
             gettimeofday(&time2, NULL);
             timeMIND+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
 		}
@@ -252,7 +259,7 @@ int main (int argc, char * const argv[]) {
 		upsampleDeformationsCL(u0,v0,w0,u1,v1,w1,m1,n1,o1,m2,n2,o2);
         upsampleDeformationsCL(ux,vx,wx,u0,v0,w0,m,n,o,m1,n1,o1);
         //float dist=landmarkDistance(ux,vx,wx,m,n,o,distsmm,casenum);
-		warpAffine(warped1,im1,im1b,X,ux,vx,wx);
+		warpAffine(warped1,movingImage,fixedImage,X,ux,vx,wx);
 		u1=new float[sz1]; v1=new float[sz1]; w1=new float[sz1];
         gettimeofday(&time2, NULL);
 		timeTrans+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
@@ -270,7 +277,7 @@ int main (int argc, char * const argv[]) {
 		timeData+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
         cout<<"D"<<flush;
         gettimeofday(&time1, NULL);
-        primsGraph(im1b,ordered,parents,edgemst,step1,m,n,o);
+        primsGraph(fixedImage,ordered,parents,edgemst,step1,m,n,o);
         regularisationCL(costall,u0,v0,w0,u1,v1,w1,hw1,step1,quant1,ordered,parents,edgemst);
         gettimeofday(&time2, NULL);
 		timeSmooth+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
@@ -280,7 +287,7 @@ int main (int argc, char * const argv[]) {
         gettimeofday(&time1, NULL);
 		upsampleDeformationsCL(u0,v0,w0,u1i,v1i,w1i,m1,n1,o1,m2,n2,o2);
         upsampleDeformationsCL(ux,vx,wx,u0,v0,w0,m,n,o,m1,n1,o1);
-		warpImageCL(warped1,im1b,warped0,ux,vx,wx);
+		warpImageCL(warped1,fixedImage,warped0,ux,vx,wx);
 		u1i=new float[sz1]; v1i=new float[sz1]; w1i=new float[sz1];
         gettimeofday(&time2, NULL);
 		timeTrans+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
@@ -345,7 +352,7 @@ int main (int argc, char * const argv[]) {
     
     //WRITE OUTPUT DISPLACEMENT FIELD AND IMAGE
     writeOutput(flow,outputflow.c_str(),sz1*3);
-    warpAffine(warped1,im1,im1b,X,ux,vx,wx);
+    warpAffine(warped1,movingImage,fixedImage,X,ux,vx,wx);
 	
     for(int i=0;i<sz;i++){
         warped1[i]+=thresholdM;

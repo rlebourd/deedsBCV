@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B95766F7274D70780063B0C3 /* deedsBCV0.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE25E2745D54C0099443C /* deedsBCV0.cpp */; };
 		B96DE25C2745D5220099443C /* affineLTS1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE2542745D5220099443C /* affineLTS1.cpp */; };
-		B96DE2672745D54C0099443C /* linearBCV.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE2612745D54C0099443C /* linearBCV.cpp */; };
 		B96DE2722745D7AE0099443C /* regularisation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE26A2745D7AD0099443C /* regularisation.cpp */; };
 		B96DE2732745D7AE0099443C /* MINDSSCbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE26B2745D7AD0099443C /* MINDSSCbox.cpp */; };
 		B96DE2742745D7AE0099443C /* dataCostD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B96DE26C2745D7AD0099443C /* dataCostD.cpp */; };
@@ -201,13 +201,13 @@
 			files = (
 				B96DE2782745D7AE0099443C /* imageIOgzType.cpp in Sources */,
 				B96DE2752745D7AE0099443C /* QRsolve.cpp in Sources */,
-				B96DE2672745D54C0099443C /* linearBCV.cpp in Sources */,
 				B96DE2732745D7AE0099443C /* MINDSSCbox.cpp in Sources */,
 				B96DE25C2745D5220099443C /* affineLTS1.cpp in Sources */,
 				B96DE2772745D7AE0099443C /* parseArguments.cpp in Sources */,
 				B96DE2742745D7AE0099443C /* dataCostD.cpp in Sources */,
 				B96DE2762745D7AE0099443C /* primsMST.cpp in Sources */,
 				B96DE2792745D7AE0099443C /* transformations.cpp in Sources */,
+				B95766F7274D70780063B0C3 /* deedsBCV0.cpp in Sources */,
 				B96DE2722745D7AE0099443C /* regularisation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
