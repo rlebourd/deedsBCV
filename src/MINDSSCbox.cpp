@@ -21,73 +21,73 @@ using namespace std;
 
 void boxfilter(float* input,float* temp1,float* temp2,int hw,int m,int n,int o){
     
-    int sz=m*n*o;
-    for(int i=0;i<sz;i++){
-        temp1[i]=input[i];
+    const int sz = m*n*o;
+    for(int i=0; i < sz; i++){
+        temp1[i] = input[i];
     }
     
-    for(int k=0;k<o;k++){
-        for(int j=0;j<n;j++){
-            for(int i=1;i<m;i++){
-                temp1[i+j*m+k*m*n]+=temp1[(i-1)+j*m+k*m*n];
+    for(int k = 0; k < o; k++){
+        for(int j = 0; j < n;j++){
+            for(int i = 1; i < m ;i++){
+                temp1[i + j*m + k*m*n] += temp1[(i-1) + j*m + k*m*n];
             }
         }
     }
     
-    for(int k=0;k<o;k++){
-        for(int j=0;j<n;j++){
-            for(int i=0;i<(hw+1);i++){
-                temp2[i+j*m+k*m*n]=temp1[(i+hw)+j*m+k*m*n];
+    for(int k = 0; k < o; k++){
+        for(int j = 0; j < n; j++){
+            for(int i = 0; i < (hw + 1); i++){
+                temp2[i + j*m + k*m*n] = temp1[(i+hw) + j*m + k*m*n];
             }
-            for(int i=(hw+1);i<(m-hw);i++){
-                temp2[i+j*m+k*m*n]=temp1[(i+hw)+j*m+k*m*n]-temp1[(i-hw-1)+j*m+k*m*n];
+            for(int i = (hw + 1); i < (m - hw); i++){
+                temp2[i + j*m + k*m*n] = temp1[(i + hw) + j*m + k*m*n] - temp1[(i-hw-1) + j*m + k*m*n];
             }
-            for(int i=(m-hw);i<m;i++){
-                temp2[i+j*m+k*m*n]=temp1[(m-1)+j*m+k*m*n]-temp1[(i-hw-1)+j*m+k*m*n];
-            }
-        }
-    }
-    
-    for(int k=0;k<o;k++){
-        for(int j=1;j<n;j++){
-            for(int i=0;i<m;i++){
-                temp2[i+j*m+k*m*n]+=temp2[i+(j-1)*m+k*m*n];
+            for(int i = (m - hw); i < m; i++){
+                temp2[i + j*m + k*m*n] = temp1[(m-1) + j*m + k*m*n] - temp1[(i-hw-1) + j*m + k*m*n];
             }
         }
     }
     
-    for(int k=0;k<o;k++){
-        for(int i=0;i<m;i++){
-            for(int j=0;j<(hw+1);j++){
-                temp1[i+j*m+k*m*n]=temp2[i+(j+hw)*m+k*m*n];
-            }
-            for(int j=(hw+1);j<(n-hw);j++){
-                temp1[i+j*m+k*m*n]=temp2[i+(j+hw)*m+k*m*n]-temp2[i+(j-hw-1)*m+k*m*n];
-            }
-            for(int j=(n-hw);j<n;j++){
-                temp1[i+j*m+k*m*n]=temp2[i+(n-1)*m+k*m*n]-temp2[i+(j-hw-1)*m+k*m*n];
+    for(int k = 0; k < o; k++){
+        for(int j = 1; j < n; j++){
+            for(int i = 0; i < m; i++){
+                temp2[i + j*m + k*m*n] += temp2[i + (j-1)*m + k*m*n];
             }
         }
     }
     
-    for(int k=1;k<o;k++){
-        for(int j=0;j<n;j++){
-            for(int i=0;i<m;i++){
-                temp1[i+j*m+k*m*n]+=temp1[i+j*m+(k-1)*m*n];
+    for(int k = 0; k < o; k++){
+        for(int i=0; i < m; i++){
+            for(int j = 0; j < (hw + 1); j++){
+                temp1[i + j*m + k*m*n] = temp2[i + (j+hw)*m + k*m*n];
+            }
+            for(int j = (hw + 1); j < (n - hw); j++){
+                temp1[i + j*m + k*m*n] = temp2[i + (j+hw)*m + k*m*n] - temp2[i + (j-hw-1)*m + k*m*n];
+            }
+            for(int j = (n - hw); j < n; j++){
+                temp1[i + j*m + k*m*n] = temp2[i + (n-1)*m + k*m*n] - temp2[i + (j-hw-1)*m + k*m*n];
             }
         }
     }
     
-    for(int j=0;j<n;j++){
-        for(int i=0;i<m;i++){
-            for(int k=0;k<(hw+1);k++){
-                input[i+j*m+k*m*n]=temp1[i+j*m+(k+hw)*m*n];
+    for(int k = 1; k < o; k++){
+        for(int j = 0; j < n; j++){
+            for(int i = 0; i < m; i++){
+                temp1[i + j*m + k*m*n] += temp1[i + j*m + (k-1)*m*n];
             }
-            for(int k=(hw+1);k<(o-hw);k++){
-                input[i+j*m+k*m*n]=temp1[i+j*m+(k+hw)*m*n]-temp1[i+j*m+(k-hw-1)*m*n];
+        }
+    }
+    
+    for(int j = 0; j < n; j++){
+        for(int i = 0; i < m; i++){
+            for(int k = 0; k < (hw+1); k++){
+                input[i + j*m + k*m*n] = temp1[i+j*m+(k+hw)*m*n];
             }
-            for(int k=(o-hw);k<o;k++){
-                input[i+j*m+k*m*n]=temp1[i+j*m+(o-1)*m*n]-temp1[i+j*m+(k-hw-1)*m*n];
+            for(int k = (hw+1); k < (o-hw); k++){
+                input[i + j*m + k*m*n] = temp1[i+j*m+(k+hw)*m*n]-temp1[i+j*m+(k-hw-1)*m*n];
+            }
+            for(int k = (o-hw); k < o; k++){
+                input[i + j*m + k*m*n] = temp1[i+j*m+(o-1)*m*n]-temp1[i+j*m+(k-hw-1)*m*n];
             }
         }
     }
@@ -108,61 +108,64 @@ void imshift(float* input,float* output,int dx,int dy,int dz,int m,int n,int o){
     }
 }
 
-void distances(float* im1,float* d1,int m,int n,int o,int qs,int l){
-    int sz1=m*n*o;
-    float* w1=new float[sz1];
+void distances(float* im1, float* d1, int m, int n, int o, int qs, int l){
+    const int sz1 = m*n*o;
     
-    float* temp1=new float[sz1]; float* temp2=new float[sz1];
-    int dx[6]={+qs,+qs,-qs,+0,+qs,+0};
-    int dy[6]={+qs,-qs,+0,-qs,+0,+qs};
-    int dz[6]={0,+0,+qs,+qs,+qs,+qs};
+    float * const w1 = new float[sz1];
+    float * const temp1 = new float[sz1];
+    float * const temp2 = new float[sz1];
     
-    imshift(im1,w1,dx[l],dy[l],dz[l],m,n,o);
-    for(int i=0;i<sz1;i++){
-        w1[i]=(w1[i]-im1[i])*(w1[i]-im1[i]);
+    const int dx[6] = {qs, qs, -qs, 0, qs, 0};
+    const int dy[6] = {qs, -qs, 0, -qs, 0, qs};
+    const int dz[6] = {0, 0, qs, qs, qs, qs};
+    
+    imshift(im1, w1, dx[l], dy[l], dz[l], m, n, o);
+    for(int i = 0; i < sz1; i++){
+        const auto dw = w1[i] - im1[i];
+        w1[i] = dw*dw;
     }
-    boxfilter(w1,temp1,temp2,qs,m,n,o);
-    for(int i=0;i<sz1;i++){
-        d1[i+l*sz1]=w1[i];
+    boxfilter(w1, temp1, temp2, qs, m, n, o);
+    for(int i = 0; i < sz1; i++){
+        d1[i + l*sz1] = w1[i];
     }
     
     delete[] temp1; delete[] temp2; delete[] w1;
 }
 
 //__builtin_popcountll(left[i]^right[i]); absolute hamming distances
-void descriptor(uint64_t* mindq,float* im1,int m,int n,int o,int qs){
+void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     //MIND with self-similarity context
     
     //============== DISTANCES USING BOXFILTER ===================
-    const int sz1=m*n*o;
-    const int len1=6;
-    float* d1=new float[sz1*len1];
+    const int sz1 = m*n*o;
+    const int len1 = 6;
+    float* d1 = new float[sz1*len1];
     
 #pragma omp parallel for
-    for(int l=0;l<len1;l++){
-        distances(im1,d1,m,n,o,qs,l);
+    for(int l=0; l < len1; l++){
+        distances(im1, d1, m, n, o, qs, l);
     }
     
     
     //
-    const int sx[12]={-qs,+0,-qs,+0,+0,+qs,+0,+0,+0,-qs,+0,+0};
-    const int sy[12]={+0,-qs,+0,+qs,+0,+0,+0,+qs,+0,+0,+0,-qs};
-    const int sz[12]={+0,+0,+0,+0,-qs,+0,-qs,+0,-qs,+0,-qs,+0};
+    const int sx[12] = {-qs,+0,-qs,+0,+0,+qs,+0,+0,+0,-qs,+0,+0};
+    const int sy[12] = {+0,-qs,+0,+qs,+0,+0,+0,+qs,+0,+0,+0,-qs};
+    const int sz[12] = {+0,+0,+0,+0,-qs,+0,-qs,+0,-qs,+0,-qs,+0};
     
-    const int index[12]={0,0,1,1,2,2,3,3,4,4,5,5};
+    const int index[12] = {0,0,1,1,2,2,3,3,4,4,5,5};
     
-    const int len2=12;
+    const int len2 = 12;
     
-    image_d=12;
+    image_d = 12;
     
     //quantisation table
-    const int val=6;
+    const int val = 6;
     
-    const unsigned long long power=32;
+    const unsigned long long power = 32;
     
 #pragma omp parallel for
     for(int k = 0; k < o; k++){
-        const unsigned int tablei[6]= {0, 1, 3, 7, 15, 31};
+        const unsigned int tablei[6] = {0, 1, 3, 7, 15, 31};
         float compare[val-1];
         for(int i = 0; i < val-1; i++){
             compare[i] = -log((i+1.5f)/val);
@@ -184,13 +187,13 @@ void descriptor(uint64_t* mindq,float* im1,int m,int n,int o,int qs){
                         mind1[l] = d1[i+j*m+k*m*n+index[l]*sz1];
                     }
                 }
-                const float minval = *min_element(mind1,mind1+len2);
+                const float minval = *min_element(mind1, mind1 + len2);
                 float sumnoise = 0.0f;
                 for(int l = 0; l < len2; l++){
                     mind1[l] -= minval;
                     sumnoise += mind1[l];
                 }
-                const float noise1 = max(sumnoise/(float)len2,1e-6f);
+                const float noise1 = max(sumnoise/(float)len2, 1e-6f);
                 for(int l = 0; l<len2; l++){
                     mind1[l] /= noise1;
                 }
