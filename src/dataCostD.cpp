@@ -284,15 +284,45 @@ void warpAffineS(short* warped,short* input,float* X,float* u1,float* v1,float* 
     
     
 }
-void warpAffine(float* warped,float* input,float* im1b,float* X,float* u1,float* v1,float* w1){
+void warpAffine(float* warped, const float* input, const float * im1b, const float *X, const float *u1, const float *v1, const float *w1){
+    // Accepts a 4x4 affine transformation X as input (or at least the first three rows necessary to
+    // calculate the transformation in a computer)
+    //
+    // Accepts two images (of size image_m, image_n, image_o--which are global variables) as inputs:
+    // - the image named "input" will be warped using the affine transform X and the displacements u1, v1, w1
+    // - the image named "im1b" will be used to measure the sum of squared differences (SSD) before and
+    //   after the transformation
+    //
+    // Accepts three displacement vectors, each having the same dimensions as the input images. These
+    // displacement vectors effectively shift each point in the input image elsewhere in the warped
+    // image. These shifts, in general (i.e. unless they are constants across all voxels), mean that
+    // we're not actually applying an affine transform to the input image. The software elsewhere
+    // refers to these displacement vectors as "flow fields" in analogy to fluid mechanics.
+    //
+    // Accepts an output parameter named "warped," which will store the result of applying the
+    // inverse of X to the image named "input."
+    //
+    // This function does multiple things. It applies an affine transform to the image "input," and
+    // it also records the sum of squared errors between the target image im1b and the warped image,
+    // as well as between the target image im1b and the original input image. This allows code
+    // outside of this function to report the sum of squared differences before and after the
+    // transformation, in order to determine how significantly the transformation reduces the error
+    // between the two images' intensities.
+    //
+    // The name of the function is slightly misleading, because it does not warp the image with the
+    // affine transform X. Instead, the function applies the inverse of X to the input in order to
+    // produce the warped image.
+    //
+    // Suggested improvements: Split the function into two separate functions (one for transforming
+    // the image and one for calculating the errors). Rename the function to reflect what it does.
+    //
+    
     int m=image_m;
     int n=image_n;
     int o=image_o;
-    int sz=m*n*o;
     
     float ssd=0;
     float ssd0=0;
-    float ssd2=0;
     
     for(int k=0;k<o;k++){
         for(int j=0;j<n;j++){

@@ -20,6 +20,6 @@ void warpImageCL(float* warped,float* im1,float* im1b,float* u1,float* v1,float*
 
 void warpAffineS(short* warped,short* input,float* X,float* u1,float* v1,float* w1);
 
-void warpAffine(float* warped,float* input,float* im1b,float* X,float* u1,float* v1,float* w1);
+void warpAffine(float *warped, const float *input, const float *im1b, const float *X, const float *u1, const float *v1, const float *w1);
 
 #endif // DATA_COST_D_H_INCLUDED
