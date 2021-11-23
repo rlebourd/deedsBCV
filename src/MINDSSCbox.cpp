@@ -173,15 +173,15 @@ void descriptor(uint64_t* mindq,float* im1,int m,int n,int o,int qs){
                 for(int l = 0; l < len2; l++){
                     if((i + sy[l]) >= 0 &&
                        (i + sy[l]) < m &&
-                       (j + sx[l]) >=0 &&
+                       (j + sx[l]) >= 0 &&
                        (j + sx[l]) < n &&
-                       (k + sz[l]) >=0 &&
+                       (k + sz[l]) >= 0 &&
                        (k + sz[l]) < o)
                     {
-                        mind1[l]=d1[i+sy[l]+(j+sx[l])*m+(k+sz[l])*m*n+index[l]*sz1];
+                        mind1[l] = d1[i+sy[l]+(j+sx[l])*m+(k+sz[l])*m*n+index[l]*sz1];
                     }
                     else{
-                        mind1[l]=d1[i+j*m+k*m*n+index[l]*sz1];
+                        mind1[l] = d1[i+j*m+k*m*n+index[l]*sz1];
                     }
                 }
                 const float minval = *min_element(mind1,mind1+len2);
