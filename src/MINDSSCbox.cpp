@@ -118,7 +118,7 @@ void boxfilter(float* input, int hw, int m, int n, int o){
 }
 
 
-void imshift(float* input,float* output,int dx,int dy,int dz,int m,int n,int o){
+void imshift(const float* input,float* output,int dx,int dy,int dz,int m,int n,int o){
     // shifts the image by the given 3D displacement
     for(int k=0;k<o;k++){
         for(int j=0;j<n;j++){
@@ -132,7 +132,7 @@ void imshift(float* input,float* output,int dx,int dy,int dz,int m,int n,int o){
     }
 }
 
-void distances(float* im1, float* d1, int m, int n, int o, int qs, int l){
+void distances(const float* im1, float* d1, int m, int n, int o, int qs){
     const int sz1 = m*n*o;
     
     float * const w1 = new float[sz1];
@@ -142,18 +142,28 @@ void distances(float* im1, float* d1, int m, int n, int o, int qs, int l){
     const int dy[6] = {qs, -qs, 0, -qs, 0, qs};
     const int dz[6] = {0, 0, qs, qs, qs, qs};
     
-    imshift(im1, w1, dx[l], dy[l], dz[l], m, n, o);
-    
-    // calculates the squared distance between each voxel in the original image and the shifted image
-    for(int i = 0; i < sz1; i++){
-        const auto dw = w1[i] - im1[i];
-        w1[i] = dw*dw;
-    }
-    
-    //
-    boxfilter(w1, qs, m, n, o);
-    for(int i = 0; i < sz1; i++){
-        d1[i + l*sz1] = w1[i];
+#pragma omp parallel for
+    for(int l=0; l < 6; l++){
+        // shifts the image by dx[l], dy[l], dz[l]
+        imshift(im1, w1, dx[l], dy[l], dz[l], m, n, o);
+        
+        // calculates the squared distance between each voxel in the original image and the shifted image
+        for(int i = 0; i < sz1; i++){
+            const auto dw = w1[i] - im1[i];
+            w1[i] = dw*dw;
+        }
+        
+        // blurs the squared-distances matrix using qs as the blur radius
+        boxfilter(w1, qs, m, n, o);
+        for(int i = 0; i < sz1; i++){
+            // stores the whole squared-distances matrix in level-l of the 4-D matrix d1
+            d1[i + l*sz1] = w1[i];
+            
+            // stores 6 floats per voxel => d1[i + j*m + k*m*n + l*m*n*o] =
+            // component l of the vector for voxel (i, j, k)
+            // so we can see here that d1 is 4-dimensional and it is
+            // accessed like d1(i, j, k, l).
+        }
     }
     
     delete[] w1;
@@ -169,13 +179,10 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     //============== DISTANCES USING BOXFILTER ===================
     const int sz1 = m*n*o;
     const int len1 = 6;
-    float* d1 = new float[sz1*len1];
+    float* d1 = new float[sz1*len1]; // 6 floats per voxel
     
-#pragma omp parallel for
-    for(int l=0; l < len1; l++){
-        distances(im1, d1, m, n, o, qs, l);
-    }
-    
+    // calculate blurred distances for 6 different vectorial shifts of the image
+    distances(im1, d1, m, n, o, qs);
     
     //
     const int sx[12] = {-qs, 0,-qs,0,0,qs,0,0,0,-qs,0,0};
@@ -199,6 +206,7 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
         float mind1[12];
         for(int j = 0; j < n; j++){
             for(int i = 0; i < m; i++){
+                // initialize the mind descriptors from the blurred distances
                 for(int l = 0; l < len2; l++){
                     if((i + sy[l]) >= 0 &&
                        (i + sy[l]) < m &&
@@ -213,16 +221,21 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                         mind1[l] = d1[ind(i,j,k) + index[l]*sz1];
                     }
                 }
-                const float minval = *min_element(mind1, mind1 + len2);
-                float sumnoise = 0.0f;
+                
+                // calculate the Z-score of the mind descriptor
+                // (value - mean) / std-dev
+                const float minimumBlurredSquaredDistance = *min_element(mind1, mind1 + len2);
+                float totalNoise = 0.0f;
                 for(int l = 0; l < len2; l++){
-                    mind1[l] -= minval;
-                    sumnoise += mind1[l];
+                    mind1[l] -= minimumBlurredSquaredDistance;
+                    totalNoise += mind1[l];
                 }
-                const float noise1 = max(sumnoise/(float)len2, 1e-6f);
-                for(int l = 0; l<len2; l++){
-                    mind1[l] /= noise1;
+                const float averageNoise = max(totalNoise/(float)len2, 1e-6f);
+                for(int l = 0; l < len2; l++){
+                    mind1[l] /= averageNoise;
                 }
+                
+                //
                 unsigned long long accum=0;
                 unsigned long long tabled1=1;
                 
