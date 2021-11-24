@@ -16,7 +16,7 @@ void dataCostCL(unsigned long* data,
                 float alpha,
                 int randnum);
 
-void warpImageCL(float* warped,float* im1,float* im1b,float* u1,float* v1,float* w1);
+void warpImageCL(float* warped, const float* im1, const float* im1b, const float* u1, const float* v1, const float* w1);
 
 void warpAffineS(short* warped,short* input,float* X,float* u1,float* v1,float* w1);
 

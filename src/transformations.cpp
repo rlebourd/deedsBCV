@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void interp3(float* interp,float* input,float* x1,float* y1,float* z1,int m,int n,int o,int m2,int n2,int o2,bool flag){
+void interp3(float* interp, const float* input, const float* x1, const float* y1, const float* z1,int m,int n,int o,int m2,int n2,int o2,bool flag){
 	for(int k=0;k<o;k++){
 		for(int j=0;j<n;j++){
 			for(int i=0;i<m;i++){
@@ -15,7 +15,8 @@ void interp3(float* interp,float* input,float* x1,float* y1,float* z1,int m,int 
 				if(flag){
 					x+=j; y+=i; z+=k;
 				}
-				interp[i+j*m+k*m*n]=(1.0-dx)*(1.0-dy)*(1.0-dz)*input[std::min(std::max(y,0),m2-1)+std::min(std::max(x,0),n2-1)*m2+std::min(std::max(z,0),o2-1)*m2*n2]+
+				interp[i+j*m+k*m*n]=
+                (1.0-dx)*(1.0-dy)*(1.0-dz)*input[std::min(std::max(y,0),m2-1)+std::min(std::max(x,0),n2-1)*m2+std::min(std::max(z,0),o2-1)*m2*n2]+
 				(1.0-dx)*dy*(1.0-dz)*input[std::min(std::max(y+1,0),m2-1)+std::min(std::max(x,0),n2-1)*m2+std::min(std::max(z,0),o2-1)*m2*n2]+
 				dx*(1.0-dy)*(1.0-dz)*input[std::min(std::max(y,0),m2-1)+std::min(std::max(x+1,0),n2-1)*m2+std::min(std::max(z,0),o2-1)*m2*n2]+
 				(1.0-dx)*(1.0-dy)*dz*input[std::min(std::max(y,0),m2-1)+std::min(std::max(x,0),n2-1)*m2+std::min(std::max(z+1,0),o2-1)*m2*n2]+

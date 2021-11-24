@@ -5,7 +5,7 @@
  calculates Jacobian and harmonic Energy */
 
 
-void interp3(float* interp,float* input,float* x1,float* y1,float* z1,int m,int n,int o,int m2,int n2,int o2,bool flag);
+void interp3(float* interp, const float* input, const float* x1, const float* y1, const float* z1,int m,int n,int o,int m2,int n2,int o2,bool flag);
 
 void filter1(float* imagein,float* imageout,int m,int n,int o,float* filter,int length,int dim);
 

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-void boxfilter(float* input,float* temp1,float* temp2,int hw,int m,int n,int o);
+void boxfilter(float* input, int hw, int m, int n, int o);
 
 void imshift(float* input,float* output,int dx,int dy,int dz,int m,int n,int o);
 

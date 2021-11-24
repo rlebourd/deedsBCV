@@ -230,15 +230,13 @@ void dataCostCL(unsigned long* data,unsigned long* data2,float* results,int m,in
 }
 
 
-void warpImageCL(float* warped,float* im1,float* im1b,float* u1,float* v1,float* w1){
-    int m=image_m;
-    int n=image_n;
-    int o=image_o;
-    int sz=m*n*o;
+void warpImageCL(float* warped, const float* im1, const float* im1b, const float* u1, const float* v1, const float* w1){
+    const int m=image_m;
+    const int n=image_n;
+    const int o=image_o;
     
     float ssd=0;
     float ssd0=0;
-    float ssd2=0;
     
     interp3(warped,im1,u1,v1,w1,m,n,o,m,n,o,true);
     
@@ -262,7 +260,6 @@ void warpAffineS(short* warped,short* input,float* X,float* u1,float* v1,float* 
     int m=image_m;
     int n=image_n;
     int o=image_o;
-    int sz=m*n*o;
     for(int k=0;k<o;k++){
         for(int j=0;j<n;j++){
             for(int i=0;i<m;i++){
@@ -328,11 +325,11 @@ void warpAffine(float* warped, const float* input, const float * im1b, const flo
         for(int j=0;j<n;j++){
             for(int i=0;i<m;i++){
                 
-                float y1=(float)i*X[0]+(float)j*X[1]+(float)k*X[2]+(float)X[3]+v1[i+j*m+k*m*n];
-                float x1=(float)i*X[4]+(float)j*X[5]+(float)k*X[6]+(float)X[7]+u1[i+j*m+k*m*n];
-                float z1=(float)i*X[8]+(float)j*X[9]+(float)k*X[10]+(float)X[11]+w1[i+j*m+k*m*n];
-                int x=floor(x1); int y=floor(y1);  int z=floor(z1);
-                float dx=x1-x; float dy=y1-y; float dz=z1-z;
+                const float y1=(float)i*X[0]+(float)j*X[1]+(float)k*X[2]+(float)X[3]+v1[i+j*m+k*m*n];
+                const float x1=(float)i*X[4]+(float)j*X[5]+(float)k*X[6]+(float)X[7]+u1[i+j*m+k*m*n];
+                const float z1=(float)i*X[8]+(float)j*X[9]+(float)k*X[10]+(float)X[11]+w1[i+j*m+k*m*n];
+                const int x=floor(x1); const int y=floor(y1);  const int z=floor(z1);
+                const float dx=x1-x; const float dy=y1-y; const float dz=z1-z;
                 
                 
                 warped[i+j*m+k*m*n]=(1.0-dx)*(1.0-dy)*(1.0-dz)*input[min(max(y,0),m-1)+min(max(x,0),n-1)*m+min(max(z,0),o-1)*m*n]+

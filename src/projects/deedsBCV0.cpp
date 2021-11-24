@@ -211,13 +211,13 @@ int main (int argc, char * const argv[]) {
 		u1i[i]=0.0; v1i[i]=0.0; w1i[i]=0.0;
 	}
 	
-    float* warped0=new float[m*n*o];
-    warpAffine(warped0, movingImage, fixedImage, X, ux, vx, wx);
+    float *movingImageWarped = new float[m*n*o];
+    warpAffine(movingImageWarped, movingImage, fixedImage, X, ux, vx, wx);
     
 
-    uint64_t* im1_mind=new uint64_t[m*n*o];
-    uint64_t* im1b_mind=new uint64_t[m*n*o];
-    uint64_t* warped_mind=new uint64_t[m*n*o];
+    uint64_t* mindDescriptorsForMovingImage = new uint64_t[m*n*o];
+    uint64_t* mindDescriptorsForFixedImage = new uint64_t[m*n*o];
+    uint64_t* mindDescriptorsForWarpedImage = new uint64_t[m*n*o];
 	
 	gettimeofday(&time1a, NULL);
     float timeDataSmooth=0;
@@ -234,8 +234,8 @@ int main (int argc, char * const argv[]) {
 		
         if(level==0|prev!=curr){
             gettimeofday(&time1, NULL);
-            descriptor(im1_mind,warped0,m,n,o,mind_step[level]);//im1 affine
-            descriptor(im1b_mind,fixedImage,m,n,o,mind_step[level]);
+            descriptor(mindDescriptorsForMovingImage, movingImageWarped, m,n,o,mind_step[level]);//im1 affine
+            descriptor(mindDescriptorsForFixedImage, fixedImage, m,n,o,mind_step[level]);
             gettimeofday(&time2, NULL);
             timeMIND+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
 		}
@@ -265,13 +265,13 @@ int main (int argc, char * const argv[]) {
 		timeTrans+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
         cout<<"T"<<flush;
         gettimeofday(&time1, NULL);
-		descriptor(warped_mind,warped1,m,n,o,mind_step[level]);
+		descriptor(mindDescriptorsForWarpedImage,warped1,m,n,o,mind_step[level]);
 
         gettimeofday(&time2, NULL);
 		timeMIND+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
         cout<<"M"<<flush;
         gettimeofday(&time1, NULL);
-        dataCostCL((unsigned long*)im1b_mind,(unsigned long*)warped_mind,costall,m,n,o,len3,step1,hw1,quant1,args.alpha,RAND_SAMPLES);
+        dataCostCL((unsigned long*)mindDescriptorsForFixedImage,(unsigned long*)mindDescriptorsForWarpedImage,costall,m,n,o,len3,step1,hw1,quant1,args.alpha,RAND_SAMPLES);
         gettimeofday(&time2, NULL);
 
 		timeData+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
@@ -287,24 +287,24 @@ int main (int argc, char * const argv[]) {
         gettimeofday(&time1, NULL);
 		upsampleDeformationsCL(u0,v0,w0,u1i,v1i,w1i,m1,n1,o1,m2,n2,o2);
         upsampleDeformationsCL(ux,vx,wx,u0,v0,w0,m,n,o,m1,n1,o1);
-		warpImageCL(warped1,fixedImage,warped0,ux,vx,wx);
+		warpImageCL(warped1, fixedImage, movingImageWarped, ux, vx, wx);
 		u1i=new float[sz1]; v1i=new float[sz1]; w1i=new float[sz1];
         gettimeofday(&time2, NULL);
 		timeTrans+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
         cout<<"T"<<flush;
         gettimeofday(&time1, NULL);
-		descriptor(warped_mind,warped1,m,n,o,mind_step[level]);
+		descriptor(mindDescriptorsForWarpedImage,warped1,m,n,o,mind_step[level]);
 
         gettimeofday(&time2, NULL);
 		timeMIND+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
         cout<<"M"<<flush;
         gettimeofday(&time1, NULL);
-        dataCostCL((unsigned long*)im1_mind,(unsigned long*)warped_mind,costall,m,n,o,len3,step1,hw1,quant1,args.alpha,RAND_SAMPLES);
+        dataCostCL((unsigned long*)mindDescriptorsForMovingImage,(unsigned long*)mindDescriptorsForWarpedImage,costall,m,n,o,len3,step1,hw1,quant1,args.alpha,RAND_SAMPLES);
         gettimeofday(&time2, NULL);
 		timeData+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
         cout<<"D"<<flush;
         gettimeofday(&time1, NULL);
-        primsGraph(warped0,ordered,parents,edgemst,step1,m,n,o);
+        primsGraph(movingImageWarped,ordered,parents,edgemst,step1,m,n,o);
         regularisationCL(costall,u0,v0,w0,u1i,v1i,w1i,hw1,step1,quant1,ordered,parents,edgemst);
         gettimeofday(&time2, NULL);
 		timeSmooth+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
@@ -333,8 +333,8 @@ int main (int argc, char * const argv[]) {
         
 		
 	}
-    delete im1_mind;
-    delete im1b_mind;
+    delete mindDescriptorsForMovingImage;
+    delete mindDescriptorsForFixedImage;
 	//==========================================================================================
 	//==========================================================================================
 	
