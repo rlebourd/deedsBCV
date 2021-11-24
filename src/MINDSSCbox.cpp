@@ -138,9 +138,9 @@ void distances(const float* im1, float* d1, int m, int n, int o, int qs){
     float * const w1 = new float[sz1];
     
     // shifts the whole image by a vectorial displacement determined by the input l, which ranges from 0 to 5
-    const int dx[6] = {qs, qs, -qs, 0, qs, 0};
-    const int dy[6] = {qs, -qs, 0, -qs, 0, qs};
-    const int dz[6] = {0, 0, qs, qs, qs, qs};
+    const int dx[6] = {qs,  qs, -qs,   0, qs,  0};
+    const int dy[6] = {qs, -qs,   0, -qs,  0, qs};
+    const int dz[6] = {0,    0,  qs,  qs, qs, qs};
     
 #pragma omp parallel for
     for(int l=0; l < 6; l++){
@@ -177,19 +177,27 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     };
     
     //============== DISTANCES USING BOXFILTER ===================
-    const int sz1 = m*n*o;
-    const int len1 = 6;
-    float* d1 = new float[sz1*len1]; // 6 floats per voxel
     
-    // calculate blurred distances for 6 different vectorial shifts of the image
+    // Calculate blurred distances for 6 different vectorial shifts of the image
+    //
+    // This calculation yields the distances function D(I, x, x+r) that returns the
+    // Euclidean distance between the image patches of size p centered at positions
+    // x and x+r in R3.
+    //
+    // The size p of the patch is determined by the parameter qs, which is calculated
+    // as floor(quantisation/2 + 1) and which is called the "mind step" elsewhere in
+    // the program.
+    const int numberOfVoxels = m*n*o;
+    const int numberOfDistancesPerVoxel = 6; // (aka the number of vectorial displacements r in the search region R)
+    float* d1 = new float[numberOfVoxels*numberOfDistancesPerVoxel]; // 6 floats per voxel
     distances(im1, d1, m, n, o, qs);
     
     //
-    const int sx[12] = {-qs, 0,-qs,0,0,qs,0,0,0,-qs,0,0};
-    const int sy[12] = {0,-qs,0,qs,0,0,0,qs,0,0,0,-qs};
-    const int sz[12] = {0,0,0,0,-qs,0,-qs,0,-qs,0,-qs,0};
+    const int sx[12] = {-qs,   0, -qs,  0,   0, qs,   0,  0,   0, -qs,   0,   0};
+    const int sy[12] = {  0, -qs,   0, qs,   0,  0,   0, qs,   0,   0,   0, -qs};
+    const int sz[12] = {  0,   0,   0,  0, -qs,  0, -qs,  0, -qs,   0, -qs,   0};
     
-    const int index[12] = {0,0,1,1,2,2,3,3,4,4,5,5};
+    const int index[12] = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
     const int len2 = 12;
     image_d = 12;
     
@@ -197,15 +205,16 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     const int val = 6;
     
 #pragma omp parallel for
+    float mindThreshold[val-1];
+    for(int i = 0; i < val-1; i++){
+        mindThreshold[i] = -log((i+1.5f)/val);
+    }
+    
     for(int k = 0; k < o; k++){
-        const unsigned int tablei[6] = {0, 1, 3, 7, 15, 31};
-        float compare[val-1];
-        for(int i = 0; i < val-1; i++){
-            compare[i] = -log((i+1.5f)/val);
-        }
-        float mind1[12];
         for(int j = 0; j < n; j++){
             for(int i = 0; i < m; i++){
+                float mind1[12];
+
                 // initialize the mind descriptors from the blurred distances
                 for(int l = 0; l < len2; l++){
                     if((i + sy[l]) >= 0 &&
@@ -215,10 +224,10 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                        (k + sz[l]) >= 0 &&
                        (k + sz[l]) < o)
                     {
-                        mind1[l] = d1[i + sy[l] + (j+sx[l])*m + (k+sz[l])*m*n + index[l]*sz1];
+                        mind1[l] = d1[i + sy[l] + (j+sx[l])*m + (k+sz[l])*m*n + index[l]*numberOfVoxels];
                     }
                     else{
-                        mind1[l] = d1[ind(i,j,k) + index[l]*sz1];
+                        mind1[l] = d1[ind(i,j,k) + index[l]*numberOfVoxels];
                     }
                 }
                 
@@ -241,10 +250,11 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                 
                 for(int l = 0; l < len2; l++){
                     const unsigned long long power = 32;
+                    const unsigned int tablei[6] = {0, 1, 3, 7, 15, 31};
 
                     int mind1val = 0;
                     for(int c = 0; c < val-1; c++){
-                        mind1val += (compare[c] > mind1[l]) ? 1 : 0;
+                        mind1val += (mindThreshold[c] > mind1[l]) ? 1 : 0;
                     }
                     accum += tablei[mind1val] * tabled1;
                     tabled1 *= power;
