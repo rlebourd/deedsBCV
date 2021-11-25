@@ -48,8 +48,11 @@ void boxfilter(float* input, int hw, int m, int n, int o){
         for(int j = 0; j < n; j++){
             // on the top border of temp2
             //
+            // This copies the integral of the image from the rows in the range [hw, 2*hw]
+            // into the rows in the range [0, hw]. Why is this necessary?
+            //
             for(int i = 0; i < (hw + 1); i++){
-                temp2[ind(i, j, k)] = temp1[ind(i+hw, j, k)];
+                temp2[ind(i, j, k)] = temp1[ind(i+hw, j, k)]; // note: row (i-hw-1) < (hw+1)-hw-1 = 0 => that row does not exist yet
             }
             
             // between the top and bottom borders of temp2
@@ -61,7 +64,9 @@ void boxfilter(float* input, int hw, int m, int n, int o){
             // on the bottom border of temp2
             //
             for(int i = (m - hw); i < m; i++){
-                temp2[ind(i, j, k)] = temp1[ind(m-1, j, k)] - temp1[ind(i-hw-1, j, k)];
+                temp2[ind(i, j, k)] = temp1[ind(m-1, j, k)] - temp1[ind(i-hw-1, j, k)]; // note: last row minus (hw+1) before current row
+                // this reflects an attempt to "sort of integrate"
+                // the intensity to the bottom row
             }
         }
     }
@@ -118,46 +123,59 @@ void boxfilter(float* input, int hw, int m, int n, int o){
 }
 
 
-void imshift(const float* input,float* output,int dx,int dy,int dz,int m,int n,int o){
+void shiftImage(const float* input,float* output,int dx,int dy,int dz,int m,int n,int o){
     // shifts the image by the given 3D displacement
     for(int k=0;k<o;k++){
         for(int j=0;j<n;j++){
             for(int i=0;i<m;i++){
                 if(i+dy>=0&&i+dy<m&&j+dx>=0&&j+dx<n&&k+dz>=0&&k+dz<o)
-                    output[i+j*m+k*m*n]=input[i+dy+(j+dx)*m+(k+dz)*m*n];
+                    output[i+j*m+k*m*n] = input[i+dy+(j+dx)*m+(k+dz)*m*n];
                 else
-                    output[i+j*m+k*m*n]=input[i+j*m+k*m*n];
+                    output[i+j*m+k*m*n] = input[i+j*m+k*m*n];
             }
         }
     }
 }
 
-void distances(const float* im1, float* d1, int m, int n, int o, int qs){
-    const int sz1 = m*n*o;
+void distances(const float* originalImage, float** d1, int m, int n, int o, int qs){
+    const int numberOfVoxelsInImage = m*n*o;
+    const int numberOfPositionsInSearchRegion = 6; // (aka the number of vectorial displacements r in the search region R)
+    *d1 = new float[numberOfVoxelsInImage*numberOfPositionsInSearchRegion]; // 6 floats per voxel
+
+    float * const squaredDistancesForSearchPosition = new float[numberOfVoxelsInImage];
     
-    float * const w1 = new float[sz1];
-    
-    // shifts the whole image by a vectorial displacement determined by the input l, which ranges from 0 to 5
-    const int dx[6] = {qs,  qs, -qs,   0, qs,  0};
-    const int dy[6] = {qs, -qs,   0, -qs,  0, qs};
-    const int dz[6] = {0,    0,  qs,  qs, qs, qs};
+    // shifts the whole image by a vectorial displacement
+    // determined by the input l, which ranges from 0 to 5
+    //
+    // this traverses the "search region," which consists of
+    // 6 points in the neighborhood of the central voxel.
+    //
+    const int searchPosition_dx[numberOfPositionsInSearchRegion] = {qs,  qs, -qs,   0, qs,  0};
+    const int searchPosition_dy[numberOfPositionsInSearchRegion] = {qs, -qs,   0, -qs,  0, qs};
+    const int searchPosition_dz[numberOfPositionsInSearchRegion] = {0,    0,  qs,  qs, qs, qs};
     
 #pragma omp parallel for
-    for(int l=0; l < 6; l++){
-        // shifts the image by dx[l], dy[l], dz[l]
-        imshift(im1, w1, dx[l], dy[l], dz[l], m, n, o);
+    for(int searchPositionIndex = 0; searchPositionIndex < numberOfPositionsInSearchRegion; searchPositionIndex++){
+        // shifts the image by dx, dy, dz
+        const auto dx = searchPosition_dx[searchPositionIndex];
+        const auto dy = searchPosition_dy[searchPositionIndex];
+        const auto dz = searchPosition_dz[searchPositionIndex];
+        shiftImage(originalImage,
+                   squaredDistancesForSearchPosition,
+                   dx, dy, dz,
+                   m, n, o);
         
         // calculates the squared distance between each voxel in the original image and the shifted image
-        for(int i = 0; i < sz1; i++){
-            const auto dw = w1[i] - im1[i];
-            w1[i] = dw*dw;
+        for(int i = 0; i < numberOfVoxelsInImage; i++){
+            const auto dw = squaredDistancesForSearchPosition[i] - originalImage[i];
+            squaredDistancesForSearchPosition[i] = dw*dw;
         }
         
         // blurs the squared-distances matrix using qs as the blur radius
-        boxfilter(w1, qs, m, n, o);
-        for(int i = 0; i < sz1; i++){
-            // stores the whole squared-distances matrix in level-l of the 4-D matrix d1
-            d1[i + l*sz1] = w1[i];
+        boxfilter(squaredDistancesForSearchPosition, qs, m, n, o);
+        for(int i = 0; i < numberOfVoxelsInImage; i++){
+            // stores the whole squared-distances matrix at depth "searchPositionIndex" of the 4-D matrix d1
+            (*d1)[i + searchPositionIndex*numberOfVoxelsInImage] = squaredDistancesForSearchPosition[i];
             
             // stores 6 floats per voxel => d1[i + j*m + k*m*n + l*m*n*o] =
             // component l of the vector for voxel (i, j, k)
@@ -166,7 +184,7 @@ void distances(const float* im1, float* d1, int m, int n, int o, int qs){
         }
     }
     
-    delete[] w1;
+    delete[] squaredDistancesForSearchPosition;
 }
 
 //__builtin_popcountll(left[i]^right[i]); absolute hamming distances
@@ -175,7 +193,10 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     const auto ind = [&](int i, int j, int k){
         return i + j*m + k*m*n;
     };
-    
+    const auto ind4 = [&](int i, int j, int k, int l){
+        return i + j*m + k*m*n + l*m*n*o;
+    };
+
     //============== DISTANCES USING BOXFILTER ===================
     
     // Calculate blurred distances for 6 different vectorial shifts of the image
@@ -187,18 +208,16 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     // The size p of the patch is determined by the parameter qs, which is calculated
     // as floor(quantisation/2 + 1) and which is called the "mind step" elsewhere in
     // the program.
-    const int numberOfVoxels = m*n*o;
-    const int numberOfDistancesPerVoxel = 6; // (aka the number of vectorial displacements r in the search region R)
-    float* d1 = new float[numberOfVoxels*numberOfDistancesPerVoxel]; // 6 floats per voxel
-    distances(im1, d1, m, n, o, qs);
+    float *d1 = nullptr;
+    distances(im1, &d1, m, n, o, qs);
     
-    //
+    // A number of shifts
     const int sx[12] = {-qs,   0, -qs,  0,   0, qs,   0,  0,   0, -qs,   0,   0};
     const int sy[12] = {  0, -qs,   0, qs,   0,  0,   0, qs,   0,   0,   0, -qs};
     const int sz[12] = {  0,   0,   0,  0, -qs,  0, -qs,  0, -qs,   0, -qs,   0};
     
-    const int index[12] = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
-    const int len2 = 12;
+    const int shiftToLevel[12] = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
+    const int numberOfShifts = 12;
     image_d = 12;
     
     //quantisation table
@@ -213,48 +232,52 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     for(int k = 0; k < o; k++){
         for(int j = 0; j < n; j++){
             for(int i = 0; i < m; i++){
-                float mind1[12];
+                float mindComponentsForCurrVoxel[12];
 
                 // initialize the mind descriptors from the blurred distances
-                for(int l = 0; l < len2; l++){
-                    if((i + sy[l]) >= 0 &&
-                       (i + sy[l]) < m &&
-                       (j + sx[l]) >= 0 &&
-                       (j + sx[l]) < n &&
-                       (k + sz[l]) >= 0 &&
-                       (k + sz[l]) < o)
+                for(int shiftIndex = 0; shiftIndex < numberOfShifts; shiftIndex++){
+                    const int level = shiftToLevel[shiftIndex];
+                    
+                    if((i + sy[shiftIndex]) >= 0 &&
+                       (i + sy[shiftIndex]) <  m &&
+                       (j + sx[shiftIndex]) >= 0 &&
+                       (j + sx[shiftIndex]) <  n &&
+                       (k + sz[shiftIndex]) >= 0 &&
+                       (k + sz[shiftIndex]) <  o)
                     {
-                        mind1[l] = d1[i + sy[l] + (j+sx[l])*m + (k+sz[l])*m*n + index[l]*numberOfVoxels];
+                        // the shifted pixel is in bounds
+                        mindComponentsForCurrVoxel[shiftIndex] = d1[ind4(i+sy[shiftIndex], j+sx[shiftIndex], k+sz[shiftIndex], level)];
                     }
                     else{
-                        mind1[l] = d1[ind(i,j,k) + index[l]*numberOfVoxels];
+                        // the shifted pixel is out of bounds
+                        mindComponentsForCurrVoxel[shiftIndex] = d1[ind4(i,j,k, level)];
                     }
                 }
                 
                 // calculate the Z-score of the mind descriptor
                 // (value - mean) / std-dev
-                const float minimumBlurredSquaredDistance = *min_element(mind1, mind1 + len2);
+                const float minimumBlurredSquaredDistance = *min_element(mindComponentsForCurrVoxel, mindComponentsForCurrVoxel + numberOfShifts);
                 float totalNoise = 0.0f;
-                for(int l = 0; l < len2; l++){
-                    mind1[l] -= minimumBlurredSquaredDistance;
-                    totalNoise += mind1[l];
+                for(int shiftIndex = 0; shiftIndex < numberOfShifts; shiftIndex++){
+                    mindComponentsForCurrVoxel[shiftIndex] -= minimumBlurredSquaredDistance;
+                    totalNoise += mindComponentsForCurrVoxel[shiftIndex];
                 }
-                const float averageNoise = max(totalNoise/(float)len2, 1e-6f);
-                for(int l = 0; l < len2; l++){
-                    mind1[l] /= averageNoise;
+                const float averageNoise = max(totalNoise/(float)numberOfShifts, 1e-6f);
+                for(int shiftIndex = 0; shiftIndex < numberOfShifts; shiftIndex++){
+                    mindComponentsForCurrVoxel[shiftIndex] /= averageNoise;
                 }
                 
                 //
                 unsigned long long accum=0;
                 unsigned long long tabled1=1;
                 
-                for(int l = 0; l < len2; l++){
+                for(int shiftIndex = 0; shiftIndex < numberOfShifts; shiftIndex++){
                     const unsigned long long power = 32;
                     const unsigned int tablei[6] = {0, 1, 3, 7, 15, 31};
 
                     int mind1val = 0;
-                    for(int c = 0; c < val-1; c++){
-                        mind1val += (mindThreshold[c] > mind1[l]) ? 1 : 0;
+                    for(int threshIndex = 0; threshIndex < val-1; threshIndex++){
+                        mind1val += (mindThreshold[threshIndex] > mindComponentsForCurrVoxel[shiftIndex]) ? 1 : 0;
                     }
                     accum += tablei[mind1val] * tabled1;
                     tabled1 *= power;
