@@ -190,7 +190,7 @@ void distances(const float* originalImage, float** d1, int m, int n, int o, int 
 //__builtin_popcountll(left[i]^right[i]); absolute hamming distances
 void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     //MIND with self-similarity context
-    const auto ind = [&](int i, int j, int k){
+    const auto ind3 = [&](int i, int j, int k){
         return i + j*m + k*m*n;
     };
     const auto ind4 = [&](int i, int j, int k, int l){
@@ -216,7 +216,36 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     const int sy[12] = {  0, -qs,   0, qs,   0,  0,   0, qs,   0,   0,   0, -qs};
     const int sz[12] = {  0,   0,   0,  0, -qs,  0, -qs,  0, -qs,   0, -qs,   0};
     
-    const int shiftToLevel[12] = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
+#if 0
+    // compare these shifts to:
+    
+    const int searchPosition_dx[numberOfPositionsInSearchRegion] = {qs,  qs, -qs,   0, qs,  0};
+    const int searchPosition_dy[numberOfPositionsInSearchRegion] = {qs, -qs,   0, -qs,  0, qs};
+    const int searchPosition_dz[numberOfPositionsInSearchRegion] = {0,    0,  qs,  qs, qs, qs};
+
+    dx[0] = -(sx[0]+sx[1])
+    dy[0] = -(sy[0]+sy[1])
+    dz[0] = -(sz[0]+sz[1])
+
+    dx[1] = -(sx[2]+sx[3])
+    dy[1] = -(sy[2]+sy[3])
+    dz[1] = -(sz[2]+sz[3])
+
+    dx[2] = -(sx[4]+sx[5])
+    dy[2] = -(sy[4]+sy[5])
+    dz[2] = -(sz[4]+sz[5])
+
+    // more generally:
+    
+    dx[k] = -(sx[2*k] + sx[2*k+1])
+    dy[k] = -(sy[2*k] + sy[2*k+1])
+    dz[k] = -(sz[2*k] + sz[2*k+1])
+    
+    // why this happens to be the case is not yet clear.
+
+#endif // 0
+    
+    const int shiftIndexToSearchRegionIndex[12] = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
     const int numberOfShifts = 12;
     image_d = 12;
     
@@ -236,7 +265,7 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
 
                 // initialize the mind descriptors from the blurred distances
                 for(int shiftIndex = 0; shiftIndex < numberOfShifts; shiftIndex++){
-                    const int level = shiftToLevel[shiftIndex];
+                    const int searchRegionIndex = shiftIndexToSearchRegionIndex[shiftIndex];
                     
                     if((i + sy[shiftIndex]) >= 0 &&
                        (i + sy[shiftIndex]) <  m &&
@@ -246,11 +275,29 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                        (k + sz[shiftIndex]) <  o)
                     {
                         // the shifted pixel is in bounds
-                        mindComponentsForCurrVoxel[shiftIndex] = d1[ind4(i+sy[shiftIndex], j+sx[shiftIndex], k+sz[shiftIndex], level)];
+                        //
+                        // this is the typical execution path,
+                        // except for voxels on the boundary
+                        // of the 3D image
+                        //
+                        //
+                        mindComponentsForCurrVoxel[shiftIndex] = d1[ind4(i+sy[shiftIndex],
+                                                                         j+sx[shiftIndex],
+                                                                         k+sz[shiftIndex],
+                                                                         searchRegionIndex)];
                     }
                     else{
                         // the shifted pixel is out of bounds
-                        mindComponentsForCurrVoxel[shiftIndex] = d1[ind4(i,j,k, level)];
+                        //
+                        // this case only executes for voxels
+                        // on the boundary of the 3D image
+                        //
+                        // so this is an edge case.
+                        //
+                        mindComponentsForCurrVoxel[shiftIndex] = d1[ind4(i,
+                                                                         j,
+                                                                         k,
+                                                                         searchRegionIndex)];
                     }
                 }
                 
@@ -282,7 +329,7 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                     accum += tablei[mind1val] * tabled1;
                     tabled1 *= power;
                 }
-                mindq[ind(i,j,k)] = accum;
+                mindq[ind3(i,j,k)] = accum;
             }
         }
     }
