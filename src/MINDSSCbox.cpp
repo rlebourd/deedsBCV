@@ -253,7 +253,7 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
 #endif // 0
     
     const int shiftIndexToSearchRegionIndex[12] = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
-    const int numberOfShifts = 12;
+    const int numberOfNeighbors = 12;
     image_d = 12;
     
     // Quantisation table
@@ -326,10 +326,10 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     for(int k = 0; k < o; k++){
         for(int j = 0; j < n; j++){
             for(int i = 0; i < m; i++){
-                float distancesForCurrentVoxel[numberOfShifts];
+                float distancesForCurrentVoxel[numberOfNeighbors];
 
                 // initialize the mind descriptors from the blurred distances
-                for(int shiftIndex = 0; shiftIndex < numberOfShifts; shiftIndex++){
+                for(int shiftIndex = 0; shiftIndex < numberOfNeighbors; shiftIndex++){
                     const int searchRegionIndex = shiftIndexToSearchRegionIndex[shiftIndex];
                     
                     if((i + sy[shiftIndex]) >= 0 &&
@@ -368,15 +368,15 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                 
                 // calculate the Z-score of the mind descriptor
                 // (value - mean) / std-dev
-                const float minimumDistanceFromVoxelToNeighbor = *min_element(distancesForCurrentVoxel, distancesForCurrentVoxel + numberOfShifts);
+                const float minimumDistanceFromVoxelToNeighbor = *min_element(distancesForCurrentVoxel, distancesForCurrentVoxel + numberOfNeighbors);
                 float totalNoise = 0.0f;
-                for(int shiftIndex = 0; shiftIndex < numberOfShifts; shiftIndex++){
+                for(int shiftIndex = 0; shiftIndex < numberOfNeighbors; shiftIndex++){
                     distancesForCurrentVoxel[shiftIndex] -= minimumDistanceFromVoxelToNeighbor;
                     totalNoise += distancesForCurrentVoxel[shiftIndex];
                 }
-                const float averageNoise = max(totalNoise/(float)numberOfShifts, 1e-6f);
-                for(int shiftIndex = 0; shiftIndex < numberOfShifts; shiftIndex++){
-                    distancesForCurrentVoxel[shiftIndex] /= averageNoise;
+                const float averageNoise = max(totalNoise/(float)numberOfNeighbors, 1e-6f);
+                for(int neighborIndex = 0; neighborIndex < numberOfNeighbors; neighborIndex++){
+                    distancesForCurrentVoxel[neighborIndex] /= averageNoise;
                 }
                 
                 //
@@ -392,7 +392,7 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                 unsigned long long accum=0;
                 unsigned long long tabled1=1;
                 
-                for(int shiftIndex = 0; shiftIndex < numberOfShifts; shiftIndex++){
+                for(int shiftIndex = 0; shiftIndex < numberOfNeighbors; shiftIndex++){
                     const unsigned long long power = 32;
                     const unsigned int tablei[6] = {0, 1, 3, 7, 15, 31};
 
