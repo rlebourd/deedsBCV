@@ -4,11 +4,21 @@
 #include <vector>
 #include <string>
 
-struct parameters{
-    float alpha; int levels=0; bool segment,affine,rigid;
-    std::vector<int> grid_spacing; std::vector<int> search_radius;
+struct parameters {
+    float alpha; ///< regularization parameter
+    int levels=0;
+    bool segment;
+    bool affine;
+    bool rigid;
+    std::vector<int> grid_spacing;
+    std::vector<int> search_radius;
     std::vector<int> quantisation;
-    std::string fixed_file,moving_file,output_stem,moving_seg_file,affine_file,deformed_file;
+    std::string fixed_file;
+    std::string moving_file;
+    std::string output_stem;
+    std::string moving_seg_file;
+    std::string affine_file;
+    std::string deformed_file;
 };
 
 char *realpathEx(const char *path, char *buff);
