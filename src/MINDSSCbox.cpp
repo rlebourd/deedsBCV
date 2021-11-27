@@ -219,9 +219,13 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     distances(im1, &d1, m, n, o, qs);
     
     // A number of shifts
-    const int sx[12] = {-qs,   0, -qs,  0,   0, qs,   0,  0,   0, -qs,   0,   0};
-    const int sy[12] = {  0, -qs,   0, qs,   0,  0,   0, qs,   0,   0,   0, -qs};
-    const int sz[12] = {  0,   0,   0,  0, -qs,  0, -qs,  0, -qs,   0, -qs,   0};
+    const int numberOfNeighbors = 12;
+    const int neighborIndexToSearchRegionIndex[numberOfNeighbors] = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
+    image_d = numberOfNeighbors;
+
+    const int sx[numberOfNeighbors] = {-qs,   0, -qs,  0,   0, qs,   0,  0,   0, -qs,   0,   0};
+    const int sy[numberOfNeighbors] = {  0, -qs,   0, qs,   0,  0,   0, qs,   0,   0,   0, -qs};
+    const int sz[numberOfNeighbors] = {  0,   0,   0,  0, -qs,  0, -qs,  0, -qs,   0, -qs,   0};
     
 #if 0
     // compare these shifts to:
@@ -251,10 +255,6 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     // why this happens to be the case is not yet clear.
 
 #endif // 0
-    
-    const int neighborIndexToSearchRegionIndex[12] = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
-    const int numberOfNeighbors = 12;
-    image_d = 12;
     
     // Quantisation table
     //
@@ -332,12 +332,16 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                 for(int neighborIndex = 0; neighborIndex < numberOfNeighbors; neighborIndex++){
                     const int searchRegionIndex = neighborIndexToSearchRegionIndex[neighborIndex];
                     
-                    if((i + sy[neighborIndex]) >= 0 &&
-                       (i + sy[neighborIndex]) <  m &&
-                       (j + sx[neighborIndex]) >= 0 &&
-                       (j + sx[neighborIndex]) <  n &&
-                       (k + sz[neighborIndex]) >= 0 &&
-                       (k + sz[neighborIndex]) <  o)
+                    const int iNeighbor = i + sy[neighborIndex];
+                    const int jNeighbor = j + sx[neighborIndex];
+                    const int kNeighbor = k + sz[neighborIndex];
+                    
+                    if(iNeighbor >= 0 &&
+                       iNeighbor <  m &&
+                       jNeighbor >= 0 &&
+                       jNeighbor <  n &&
+                       kNeighbor >= 0 &&
+                       kNeighbor <  o)
                     {
                         // the shifted pixel is in bounds
                         //
@@ -346,12 +350,11 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                         // of the 3D image
                         //
                         //
-                        distancesForCurrentVoxel[neighborIndex] = d1[ind4(i+sy[neighborIndex],
-                                                                          j+sx[neighborIndex],
-                                                                          k+sz[neighborIndex],
+                        distancesForCurrentVoxel[neighborIndex] = d1[ind4(iNeighbor,
+                                                                          jNeighbor,
+                                                                          kNeighbor,
                                                                           searchRegionIndex)];
-                    }
-                    else{
+                    } else {
                         // the shifted pixel is out of bounds
                         //
                         // this case only executes for voxels

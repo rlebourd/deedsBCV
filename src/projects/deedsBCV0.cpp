@@ -320,21 +320,21 @@ int main (int argc, char * const argv[]) {
         //cout<<"Time consistentMapping: "<<timeMapping<<"  \n";
 		
 		//upsample deformations from grid-resolution to high-resolution (trilinear=1st-order spline)
-		float jac=jacobian(u1,v1,w1,m1,n1,o1,step1);
+		const float jac=jacobian(u1,v1,w1,m1,n1,o1,step1);
 		
         cout<<"SSD before registration: "<<SSD0<<" and after "<<SSD1<<"\n";
 		m2=m1; n2=n1; o2=o1;
 		cout<<"\n";
        
-		delete u0; delete v0; delete w0;
-		delete costall;
+		delete[] u0; delete[] v0; delete[] w0;
+		delete[] costall;
         
-		delete parents; delete ordered;
+		delete[] parents; delete[] ordered;
         
 		
 	}
-    delete mindDescriptorsForMovingImage;
-    delete mindDescriptorsForFixedImage;
+    delete[] mindDescriptorsForMovingImage;
+    delete[] mindDescriptorsForFixedImage;
 	//==========================================================================================
 	//==========================================================================================
 	
