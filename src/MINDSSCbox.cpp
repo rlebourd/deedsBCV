@@ -326,7 +326,9 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     for(int k = 0; k < o; k++){
         for(int j = 0; j < n; j++){
             for(int i = 0; i < m; i++){
-                float distancesForCurrentVoxel[numberOfNeighbors];
+                // for each voxel in the 3D image
+                
+                float distancesFromVoxelToNeighbor[numberOfNeighbors];
 
                 // initialize the mind descriptors from the blurred distances
                 for(int neighborIndex = 0; neighborIndex < numberOfNeighbors; neighborIndex++){
@@ -350,7 +352,7 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                         // of the 3D image
                         //
                         //
-                        distancesForCurrentVoxel[neighborIndex] = d1[ind4(iNeighbor,
+                        distancesFromVoxelToNeighbor[neighborIndex] = d1[ind4(iNeighbor,
                                                                           jNeighbor,
                                                                           kNeighbor,
                                                                           searchRegionIndex)];
@@ -362,7 +364,7 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                         //
                         // so this is an edge case.
                         //
-                        distancesForCurrentVoxel[neighborIndex] = d1[ind4(i,
+                        distancesFromVoxelToNeighbor[neighborIndex] = d1[ind4(i,
                                                                           j,
                                                                           k,
                                                                           searchRegionIndex)];
@@ -371,15 +373,15 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                 
                 // calculate the Z-score of the mind descriptor
                 // (value - mean) / std-dev
-                const float minimumDistanceFromVoxelToNeighbor = *min_element(distancesForCurrentVoxel, distancesForCurrentVoxel + numberOfNeighbors);
+                const float minimumDistanceFromVoxelToNeighbor = *min_element(distancesFromVoxelToNeighbor, distancesFromVoxelToNeighbor + numberOfNeighbors);
                 float totalNoise = 0.0f;
                 for(int neighborIndex = 0; neighborIndex < numberOfNeighbors; neighborIndex++){
-                    distancesForCurrentVoxel[neighborIndex] -= minimumDistanceFromVoxelToNeighbor;
-                    totalNoise += distancesForCurrentVoxel[neighborIndex];
+                    distancesFromVoxelToNeighbor[neighborIndex] -= minimumDistanceFromVoxelToNeighbor;
+                    totalNoise += distancesFromVoxelToNeighbor[neighborIndex];
                 }
                 const float averageNoise = max(totalNoise/(float)numberOfNeighbors, 1e-6f);
                 for(int neighborIndex = 0; neighborIndex < numberOfNeighbors; neighborIndex++){
-                    distancesForCurrentVoxel[neighborIndex] /= averageNoise;
+                    distancesFromVoxelToNeighbor[neighborIndex] /= averageNoise;
                 }
                 
                 //
@@ -401,7 +403,7 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
 
                     int mind1val = 0;
                     for(int threshIndex = 0; threshIndex < numberOfMindThresholds; threshIndex++){
-                        mind1val += (mindThreshold[threshIndex] > distancesForCurrentVoxel[neighborIndex]) ? 1 : 0;
+                        mind1val += (mindThreshold[threshIndex] > distancesFromVoxelToNeighbor[neighborIndex]) ? 1 : 0;
                     }
                     accum += tablei[mind1val] * tabled1;
                     tabled1 *= power;
