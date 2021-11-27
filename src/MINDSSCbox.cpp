@@ -252,7 +252,7 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
 
 #endif // 0
     
-    const int shiftIndexToSearchRegionIndex[12] = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
+    const int neighborIndexToSearchRegionIndex[12] = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
     const int numberOfNeighbors = 12;
     image_d = 12;
     
@@ -329,15 +329,15 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                 float distancesForCurrentVoxel[numberOfNeighbors];
 
                 // initialize the mind descriptors from the blurred distances
-                for(int shiftIndex = 0; shiftIndex < numberOfNeighbors; shiftIndex++){
-                    const int searchRegionIndex = shiftIndexToSearchRegionIndex[shiftIndex];
+                for(int neighborIndex = 0; neighborIndex < numberOfNeighbors; neighborIndex++){
+                    const int searchRegionIndex = neighborIndexToSearchRegionIndex[neighborIndex];
                     
-                    if((i + sy[shiftIndex]) >= 0 &&
-                       (i + sy[shiftIndex]) <  m &&
-                       (j + sx[shiftIndex]) >= 0 &&
-                       (j + sx[shiftIndex]) <  n &&
-                       (k + sz[shiftIndex]) >= 0 &&
-                       (k + sz[shiftIndex]) <  o)
+                    if((i + sy[neighborIndex]) >= 0 &&
+                       (i + sy[neighborIndex]) <  m &&
+                       (j + sx[neighborIndex]) >= 0 &&
+                       (j + sx[neighborIndex]) <  n &&
+                       (k + sz[neighborIndex]) >= 0 &&
+                       (k + sz[neighborIndex]) <  o)
                     {
                         // the shifted pixel is in bounds
                         //
@@ -346,10 +346,10 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                         // of the 3D image
                         //
                         //
-                        distancesForCurrentVoxel[shiftIndex] = d1[ind4(i+sy[shiftIndex],
-                                                                       j+sx[shiftIndex],
-                                                                       k+sz[shiftIndex],
-                                                                       searchRegionIndex)];
+                        distancesForCurrentVoxel[neighborIndex] = d1[ind4(i+sy[neighborIndex],
+                                                                          j+sx[neighborIndex],
+                                                                          k+sz[neighborIndex],
+                                                                          searchRegionIndex)];
                     }
                     else{
                         // the shifted pixel is out of bounds
@@ -359,10 +359,10 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                         //
                         // so this is an edge case.
                         //
-                        distancesForCurrentVoxel[shiftIndex] = d1[ind4(i,
-                                                                       j,
-                                                                       k,
-                                                                       searchRegionIndex)];
+                        distancesForCurrentVoxel[neighborIndex] = d1[ind4(i,
+                                                                          j,
+                                                                          k,
+                                                                          searchRegionIndex)];
                     }
                 }
                 
@@ -370,9 +370,9 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                 // (value - mean) / std-dev
                 const float minimumDistanceFromVoxelToNeighbor = *min_element(distancesForCurrentVoxel, distancesForCurrentVoxel + numberOfNeighbors);
                 float totalNoise = 0.0f;
-                for(int shiftIndex = 0; shiftIndex < numberOfNeighbors; shiftIndex++){
-                    distancesForCurrentVoxel[shiftIndex] -= minimumDistanceFromVoxelToNeighbor;
-                    totalNoise += distancesForCurrentVoxel[shiftIndex];
+                for(int neighborIndex = 0; neighborIndex < numberOfNeighbors; neighborIndex++){
+                    distancesForCurrentVoxel[neighborIndex] -= minimumDistanceFromVoxelToNeighbor;
+                    totalNoise += distancesForCurrentVoxel[neighborIndex];
                 }
                 const float averageNoise = max(totalNoise/(float)numberOfNeighbors, 1e-6f);
                 for(int neighborIndex = 0; neighborIndex < numberOfNeighbors; neighborIndex++){
@@ -392,13 +392,13 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                 unsigned long long accum=0;
                 unsigned long long tabled1=1;
                 
-                for(int shiftIndex = 0; shiftIndex < numberOfNeighbors; shiftIndex++){
+                for(int neighborIndex = 0; neighborIndex < numberOfNeighbors; neighborIndex++){
                     const unsigned long long power = 32;
                     const unsigned int tablei[6] = {0, 1, 3, 7, 15, 31};
 
                     int mind1val = 0;
                     for(int threshIndex = 0; threshIndex < numberOfMindThresholds; threshIndex++){
-                        mind1val += (mindThreshold[threshIndex] > distancesForCurrentVoxel[shiftIndex]) ? 1 : 0;
+                        mind1val += (mindThreshold[threshIndex] > distancesForCurrentVoxel[neighborIndex]) ? 1 : 0;
                     }
                     accum += tablei[mind1val] * tabled1;
                     tabled1 *= power;
