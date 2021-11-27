@@ -33,7 +33,6 @@ void interp3(float* interp, const float* input, const float* x1, const float* y1
 
 void filter1(float* imagein,float* imageout,int m,int n,int o,float* filter,int length,int dim){
 	int i,j,k,f;
-	int i1,j1,k1;
 	int hw=(length-1)/2;
 	
 	for(i=0;i<(m*n*o);i++){
@@ -60,26 +59,25 @@ void filter1(float* imagein,float* imageout,int m,int n,int o,float* filter,int 
 void volfilter(float* imagein,int m,int n,int o,int length,float sigma){
 	
 	int hw=(length-1)/2;
-	int i,j,f;
 	float hsum=0;
 	float* filter=new float[length];
-	for(i=0;i<length;i++){
+	for(int i=0; i<length; i++){
 		filter[i]=exp(-pow((i-hw),2)/(2*pow(sigma,2)));
 		hsum=hsum+filter[i];
 	}
-	for(i=0;i<length;i++){
+	for(int i=0; i<length; i++){
 		filter[i]=filter[i]/hsum;
 	}
 	float* image1=new float[m*n*o];
-    for(i=0;i<m*n*o;i++){
+    for(int i=0; i<m*n*o; i++){
         image1[i]=imagein[i];
     }
     filter1(image1,imagein,m,n,o,filter,length,1);
 	filter1(imagein,image1,m,n,o,filter,length,2);
 	filter1(image1,imagein,m,n,o,filter,length,3);
 	
-	delete image1;
-	delete filter;	
+	delete[] image1;
+	delete[] filter;
 	
 }
 
@@ -241,8 +239,8 @@ void consistentMappingCL(float* u,float* v,float* w,float* u2,float* v2,float* w
     }
     
     
-    delete us; delete vs; delete ws;
-    delete us2; delete vs2; delete ws2;
+    delete[] us; delete[] vs; delete[] ws;
+    delete[] us2; delete[] vs2; delete[] ws2;
 }
 
 

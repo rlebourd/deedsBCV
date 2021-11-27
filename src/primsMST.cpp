@@ -54,7 +54,6 @@ void primsGraph(float* im1,int* ordered,int* parents,float* edgemst,int step1,in
     int o=o2/step1;
     
     int num_vertices=m*n*o; int sz=num_vertices;
-    int len=m*n*o;
     timeval time1,time2;
     int num_neighbours=6;
     float* edgecost=new float[num_vertices*num_neighbours];
@@ -112,11 +111,7 @@ void primsGraph(float* im1,int* ordered,int* parents,float* edgemst,int step1,in
     for(int i=0;i<sz*6;i++){
         edgecost[i]=-edgecost2weight(edgecost[i],2.0f*stdim);
     }
-    
-    float centrex=n/2;
-    float centrey=m/2;
-    float centrez=o/2;
-    
+        
     int root=m/2+n/2*m+o/2*m*n;
     
     std::vector<Edge> priority;
@@ -150,8 +145,6 @@ void primsGraph(float* im1,int* ordered,int* parents,float* edgemst,int step1,in
             minedge=priority.front();
             pop_heap(priority.begin(),priority.end());
             priority.pop_back();
-            bool new1=vertices[minedge.vert1]; //is either vertex already part of MST?
-            bool new2=vertices[minedge.vert2];
             last=newEdge(minedge,edgeout,vertices); //return next valid vertex or -1 if edge exists already
         }
         cost+=edgeout.weight;
@@ -188,7 +181,7 @@ void primsGraph(float* im1,int* ordered,int* parents,float* edgemst,int step1,in
     
     
     gettimeofday(&time2, NULL);
-    double timeAll=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+    //const double timeAll=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
     nth_element(levelcount,levelcount+maxlevel/2,levelcount+maxlevel);
     //printf("Prims algorithm with %d levels finished in %f secs.\nMaximum %d, minimum %d, mean %d, and median %d width of tree.\n",
     // maxlevel,timeAll,*max_element(levelcount,levelcount+maxlevel),*min_element(levelcount,levelcount+maxlevel),(int)(num_vertices/maxlevel),levelcount[maxlevel/2]);
@@ -208,10 +201,10 @@ void primsGraph(float* im1,int* ordered,int* parents,float* edgemst,int step1,in
     }
     priority.clear();
     
-    delete edgecost;
-    delete index_neighbours;
-    delete levelcount;
-    delete leveloffset;
-    delete vertices;
-    delete level;
+    delete[] edgecost;
+    delete[] index_neighbours;
+    delete[] levelcount;
+    delete[] leveloffset;
+    delete[] vertices;
+    delete[] level;
 }

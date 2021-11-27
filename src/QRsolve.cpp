@@ -242,11 +242,11 @@ void findRigid(float* RT,float* pts1t,float* pts2t,int len){
         RT[3+i*4]=t0[i];
     }
     
-    delete pts1;
-    delete pts2;
+    delete[] pts1;
+    delete[] pts2;
     
     // delete pts2_4;
-    delete Rpts2;
+    delete[] Rpts2;
     
 }
 
@@ -310,6 +310,6 @@ void affineRobust(float* RT,float* pts1,float* pts2,int len){
         
         
     }
-    delete pts1b; delete pts2b; delete err; delete err2;
+    delete[] pts1b; delete[] pts2b; delete[] err; delete[] err2;
     
 }
