@@ -326,7 +326,7 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
     for(int k = 0; k < o; k++){
         for(int j = 0; j < n; j++){
             for(int i = 0; i < m; i++){
-                float mindComponentsForCurrVoxel[numberOfShifts];
+                float distancesForCurrentVoxel[numberOfShifts];
 
                 // initialize the mind descriptors from the blurred distances
                 for(int shiftIndex = 0; shiftIndex < numberOfShifts; shiftIndex++){
@@ -346,10 +346,10 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                         // of the 3D image
                         //
                         //
-                        mindComponentsForCurrVoxel[shiftIndex] = d1[ind4(i+sy[shiftIndex],
-                                                                         j+sx[shiftIndex],
-                                                                         k+sz[shiftIndex],
-                                                                         searchRegionIndex)];
+                        distancesForCurrentVoxel[shiftIndex] = d1[ind4(i+sy[shiftIndex],
+                                                                       j+sx[shiftIndex],
+                                                                       k+sz[shiftIndex],
+                                                                       searchRegionIndex)];
                     }
                     else{
                         // the shifted pixel is out of bounds
@@ -359,24 +359,24 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
                         //
                         // so this is an edge case.
                         //
-                        mindComponentsForCurrVoxel[shiftIndex] = d1[ind4(i,
-                                                                         j,
-                                                                         k,
-                                                                         searchRegionIndex)];
+                        distancesForCurrentVoxel[shiftIndex] = d1[ind4(i,
+                                                                       j,
+                                                                       k,
+                                                                       searchRegionIndex)];
                     }
                 }
                 
                 // calculate the Z-score of the mind descriptor
                 // (value - mean) / std-dev
-                const float minimumBlurredSquaredDistance = *min_element(mindComponentsForCurrVoxel, mindComponentsForCurrVoxel + numberOfShifts);
+                const float minimumDistanceFromVoxelToNeighbor = *min_element(distancesForCurrentVoxel, distancesForCurrentVoxel + numberOfShifts);
                 float totalNoise = 0.0f;
                 for(int shiftIndex = 0; shiftIndex < numberOfShifts; shiftIndex++){
-                    mindComponentsForCurrVoxel[shiftIndex] -= minimumBlurredSquaredDistance;
-                    totalNoise += mindComponentsForCurrVoxel[shiftIndex];
+                    distancesForCurrentVoxel[shiftIndex] -= minimumDistanceFromVoxelToNeighbor;
+                    totalNoise += distancesForCurrentVoxel[shiftIndex];
                 }
                 const float averageNoise = max(totalNoise/(float)numberOfShifts, 1e-6f);
                 for(int shiftIndex = 0; shiftIndex < numberOfShifts; shiftIndex++){
-                    mindComponentsForCurrVoxel[shiftIndex] /= averageNoise;
+                    distancesForCurrentVoxel[shiftIndex] /= averageNoise;
                 }
                 
                 //
@@ -398,7 +398,7 @@ void descriptor(uint64_t* mindq, float* im1, int m, int n, int o, int qs){
 
                     int mind1val = 0;
                     for(int threshIndex = 0; threshIndex < numberOfMindThresholds; threshIndex++){
-                        mind1val += (mindThreshold[threshIndex] > mindComponentsForCurrVoxel[shiftIndex]) ? 1 : 0;
+                        mind1val += (mindThreshold[threshIndex] > distancesForCurrentVoxel[shiftIndex]) ? 1 : 0;
                     }
                     accum += tablei[mind1val] * tabled1;
                     tabled1 *= power;
