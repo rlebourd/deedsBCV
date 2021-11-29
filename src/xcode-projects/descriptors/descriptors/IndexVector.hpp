@@ -18,7 +18,7 @@ namespace mind {
         size_t slice_;
         
     public:
-        
+        IndexVector(size_t row, size_t col, size_t slice);
     };
 
 }

@@ -9,14 +9,17 @@
 #define Matrix_hpp
 
 #include <stdio.h>
+#include <string>
+#include <vector>
+#include "IndexVector.hpp"
 
 namespace mind {
 
     class Matrix {
-        const size_t numberOfRows_;
-        const size_t numberOfCols_;
-        const size_t numberOfSlices_;
-        const std::vector<double> elements_;
+        size_t numberOfRows_;
+        size_t numberOfCols_;
+        size_t numberOfSlices_;
+        std::vector<double> elements_;
         
         Matrix(size_t nrows, size_t ncols, size_t nslices, std::vector<double> elems);
         
@@ -32,7 +35,7 @@ namespace mind {
         const double &at(size_t row, size_t col, size_t slice) const;
         Matrix subtracting(const Matrix &rhs) const;
         Matrix integratedAlongXYZ() const;
-        Matrix shiftedBy(const Vector &dr) const;
+        Matrix translatedBy(const IndexVector &dr) const;
         
         /// @brief A Callable object is a function-like object that accepts
         /// a matrix index and element value as its arguments, and which

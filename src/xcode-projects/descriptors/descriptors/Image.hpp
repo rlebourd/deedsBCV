@@ -9,6 +9,8 @@
 #define Image_hpp
 
 #include <stdio.h>
+#include <string>
+#include "Matrix.hpp"
 
 namespace mind {
 
@@ -21,7 +23,7 @@ namespace mind {
         static mind::Image loadedFromNitfiFile(std::string filename);
         
         /// @brief Returns a const reference to the image's matrix of intensity values
-        const mind::Matrix &intensities() const;
+        const mind::Matrix &intensitiesMatrix() const;
     };
 
 }
