@@ -12,8 +12,7 @@
 #include <map>
 
 static std::map<mind::IndexVector, mind::Matrix> createDistances(){
-    std::map<mind::IndexVector, mind::Matrix> distances;
-    
+    // create the search region
     const size_t qs = 0u;
     const auto searchRegion = std::vector<mind::IndexVector>{
         mind::IndexVector{ qs,  qs,  0},
@@ -24,11 +23,18 @@ static std::map<mind::IndexVector, mind::Matrix> createDistances(){
         mind::IndexVector{  0,  qs, qs},
     };
     
+    // create the patch vector
     const size_t patchLength = 5u;
-    const auto patchVector = mind::IndexVector{patchLength, patchLength, patchLength};
-    const auto originalImage = mind::Image::loadedFromFile("example.nii.gz");
+    const auto patchVector = mind::IndexVector{patchLength,
+                                               patchLength,
+                                               patchLength};
     
+    // create the image
+    const auto originalImage = mind::Image::loadedFromFile("example.nii.gz");
     const auto &originalIntensities = originalImage.intensitiesMatrix();
+    
+    // populate the distances lookup table
+    std::map<mind::IndexVector, mind::Matrix> distances;
     for (auto dr : searchRegion){
         const mind::Matrix integratedDifferences = originalIntensities
                                                        .subtracting(originalIntensities.translatedBy(dr))
