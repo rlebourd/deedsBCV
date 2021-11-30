@@ -48,7 +48,17 @@ static std::map<mind::IndexVector, mind::Matrix> createDistances(){
 }
 
 int main(int argc, const char * argv[]) {
+    // create the SSC-based descriptors
     auto distances = createDistances();
+    
+    // normalize the distances
+    
+    
+    // quantize the components of the descriptor
+    
+    
+    // produce the descriptor
+    
     
     return 0;
 }

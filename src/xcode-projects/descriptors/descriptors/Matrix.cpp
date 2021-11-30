@@ -16,6 +16,11 @@ mind::Matrix::Matrix(size_t nrows, size_t ncols, size_t nslices, std::vector<dou
     elements_ = elems;
 }
 
+mind::Matrix mind::Matrix::fromData(size_t nrows, size_t ncols, size_t nslices, std::vector<double> elements)
+{
+    return mind::Matrix{nrows, ncols, nslices, elements};
+}
+
 mind::Matrix mind::Matrix::identityMatrix(size_t nrows, size_t ncols, size_t nslices)
 {
     std::vector<double> elems = std::vector<double>(nrows*ncols*nslices, 0);

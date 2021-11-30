@@ -19,6 +19,8 @@ namespace mind {
         mind::Matrix intensities_;
         
     public:
+        Image(mind::Matrix matrix);
+
         /// @brief Loads the image from a NITFI file with extension nii.gz
         static mind::Image loadedFromFile(std::string filename);
         

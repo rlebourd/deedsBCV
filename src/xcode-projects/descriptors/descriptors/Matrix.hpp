@@ -26,6 +26,7 @@ namespace mind {
         size_t linearIndexOfElementAtMatrixIndex(size_t row, size_t col, size_t slice) const;
         
     public:
+        static Matrix fromData(size_t nrows, size_t ncols, size_t nslices, std::vector<double> elements);
         static Matrix identityMatrix(size_t nrows, size_t ncols, size_t nslices);
         static Matrix onesMatrix(size_t nrows, size_t ncols, size_t nslices);
         static Matrix zerosMatrix(size_t nrows, size_t ncols, size_t nslices);
