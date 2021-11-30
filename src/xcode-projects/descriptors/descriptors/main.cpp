@@ -29,7 +29,7 @@ static std::map<mind::IndexVector, mind::Matrix> createDistances(){
         const mind::Matrix integratedDifferences = originalIntensities
                                                        .subtracting(originalIntensities.translatedBy(dr))
                                                        .integratedAlongXYZ();
-        const auto convolution = [&](mind::IndexVector &idx, double element){
+        const auto convolution = [&](const mind::IndexVector &idx, double element){
             // TODO: address underflow and overflow
             //
             // Adding the patch vector could put the index
