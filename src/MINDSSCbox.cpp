@@ -120,12 +120,15 @@ void distances(float* im1,float* d1,int m,int n,int o,int qs,int l){
 
 //__builtin_popcountll(left[i]^right[i]); absolute hamming distances
 void descriptor(uint64_t* mindq,float* im1,int m,int n,int o,int qs){
+    // the given voxel is determined by the index i, j, k and the offsets di, dj, dk
+    // this voxel is then compared to one of its neighboring voxels
+    //
     //MIND with self-similarity context
-    const int sx[12]={-qs,   0, -qs,  0,   0, qs,   0,  0,   0, -qs,   0, 0};
+    const int sx[12]={-qs,   0, -qs,  0,   0, qs,   0,  0,   0, -qs,   0,   0};
     const int sy[12]={  0, -qs,   0, qs,   0,  0,   0, qs,   0,   0,   0, -qs};
-    const int sz[12]={  0,   0,   0,  0, -qs,  0, -qs,  0, -qs,   0, -qs, 0};
+    const int sz[12]={  0,   0,   0,  0, -qs,  0, -qs,  0, -qs,   0, -qs,   0};
     
-    const int index[12]={0,0,1,1,2,2,3,3,4,4,5,5};
+    const int index[12]={0,0,1,1,2,2,3,3,4,4,5,5}; // this determines which neighboring voxel is compared to the given voxel
     
     const int len1=6;
     const int len2=12;
@@ -156,7 +159,16 @@ void descriptor(uint64_t* mindq,float* im1,int m,int n,int o,int qs){
         float mind1[12];
         for(int j=0;j<n;j++){
             for(int i=0;i<m;i++){
+                // for the given voxel
                 for(int l=0;l<len2;l++){
+                    // At each iteration of the loop, a neighbor (N1) of the voxel of
+                    // interest (VOI) is compared to one of its own neighbors (N2);
+                    // the distance between them is looked up in the distances matrix
+                    // and stored temporarily for later final computation of
+                    // the SSC descriptor. The neighbor N1 is determined by the
+                    // loop index and the arrays sx, sy, and sz. The neighbor N2 is
+                    // indirectly determined by the arrays dx, dy, and dz.
+                    
                     if(i+sy[l]>=0&&i+sy[l]<m&&j+sx[l]>=0&&j+sx[l]<n&&k+sz[l]>=0&&k+sz[l]<o){
                         mind1[l]=d1[i+sy[l]+(j+sx[l])*m+(k+sz[l])*m*n+index[l]*sz1];
                     }
