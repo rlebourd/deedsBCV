@@ -14,10 +14,14 @@
 static std::map<mind::IndexVector, mind::Matrix> createDistances(){
     std::map<mind::IndexVector, mind::Matrix> distances;
     
+    const size_t qs = 0u;
     const auto searchRegion = std::vector<mind::IndexVector>{
-        mind::IndexVector{1, 0, 0},
-        mind::IndexVector{0, 1, 0},
-        mind::IndexVector{0, 0, 1}
+        mind::IndexVector{ qs,  qs,  0},
+        mind::IndexVector{ qs, -qs,  0},
+        mind::IndexVector{-qs,   0, qs},
+        mind::IndexVector{  0, -qs, qs},
+        mind::IndexVector{ qs,   0, qs},
+        mind::IndexVector{  0,  qs, qs},
     };
     
     const size_t patchLength = 5u;
