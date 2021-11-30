@@ -19,6 +19,12 @@ namespace mind {
         
     public:
         IndexVector(size_t row, size_t col, size_t slice);
+        
+        IndexVector subtracting(const IndexVector &rhs) const;
+        IndexVector adding(const IndexVector &rhs) const;
+        size_t row() const;
+        size_t column() const;
+        size_t slice() const;
     };
 
 }

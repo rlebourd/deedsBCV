@@ -51,6 +51,16 @@ const double &mind::Matrix::at(size_t row, size_t col, size_t slice) const
     return elements_[linearIndex];
 }
 
+double &mind::Matrix::at(const mind::IndexVector &idx)
+{
+    return at(idx.row(), idx.column(), idx.slice());
+}
+
+const double &mind::Matrix::at(const mind::IndexVector &idx) const
+{
+    return at(idx.row(), idx.column(), idx.slice());
+}
+
 size_t mind::Matrix::linearIndexOfElementAtMatrixIndex(size_t row, size_t col, size_t slice) const
 {
     assert(row < numberOfRows_);
@@ -78,4 +88,3 @@ mind::Matrix mind::Matrix::translatedBy(const mind::IndexVector &dr) const
 {
     return identityMatrix(numberOfRows_, numberOfCols_, numberOfSlices_);
 }
-

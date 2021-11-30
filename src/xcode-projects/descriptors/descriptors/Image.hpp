@@ -20,7 +20,7 @@ namespace mind {
         
     public:
         /// @brief Loads the image from a NITFI file with extension nii.gz
-        static mind::Image loadedFromNitfiFile(std::string filename);
+        static mind::Image loadedFromFile(std::string filename);
         
         /// @brief Returns a const reference to the image's matrix of intensity values
         const mind::Matrix &intensitiesMatrix() const;

@@ -33,6 +33,8 @@ namespace mind {
         size_t numberOfElements() const;
         double &at(size_t row, size_t col, size_t slice);
         const double &at(size_t row, size_t col, size_t slice) const;
+        double &at(const mind::IndexVector &idx);
+        const double &at(const mind::IndexVector &idx) const;
         Matrix subtracting(const Matrix &rhs) const;
         Matrix integratedAlongXYZ() const;
         Matrix translatedBy(const IndexVector &dr) const;
