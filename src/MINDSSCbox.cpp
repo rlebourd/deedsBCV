@@ -121,9 +121,9 @@ void distances(float* im1,float* d1,int m,int n,int o,int qs,int l){
 //__builtin_popcountll(left[i]^right[i]); absolute hamming distances
 void descriptor(uint64_t* mindq,float* im1,int m,int n,int o,int qs){
     //MIND with self-similarity context
-    const int sx[12]={-qs,0,-qs,0,0,+qs,0,0,0,-qs,0,0};
-    const int sy[12]={0,-qs,0,+qs,0,0,0,+qs,0,0,0,-qs};
-    const int sz[12]={0,0,0,0,-qs,0,-qs,0,-qs,0,-qs,0};
+    const int sx[12]={-qs,   0, -qs,  0,   0, qs,   0,  0,   0, -qs,   0, 0};
+    const int sy[12]={  0, -qs,   0, qs,   0,  0,   0, qs,   0,   0,   0, -qs};
+    const int sz[12]={  0,   0,   0,  0, -qs,  0, -qs,  0, -qs,   0, -qs, 0};
     
     const int index[12]={0,0,1,1,2,2,3,3,4,4,5,5};
     
