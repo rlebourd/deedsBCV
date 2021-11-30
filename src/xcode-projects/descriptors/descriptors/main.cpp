@@ -32,11 +32,11 @@ static std::map<mind::IndexVector, mind::Matrix> createDistances(){
         const auto convolution = [&](mind::IndexVector &idx, double element){
             // TODO: address underflow and overflow
             //
-            // adding the patch vector could put the index
-            // beyond the bounds of the matrix subtracting
+            // Adding the patch vector could put the index
+            // beyond the bounds of the matrix, and subtracting
             // the patch vector could put the index below
-            // (0, 0, 0), also outside the bounds of the
-            // matrix.
+            // the bounds of the matrix (i.e with negative
+            // components)
             const auto F1 = integratedDifferences.at(idx.subtracting(patchVector));
             const auto F2 = integratedDifferences.at(idx.adding(patchVector));
             return (F2 - F1);
