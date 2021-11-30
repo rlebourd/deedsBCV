@@ -46,7 +46,7 @@ namespace mind {
         /// The resulting matrix is constructed by applying the given
         /// transformation to each element in the matrix.
         template <typename Callable>
-        Matrix mappingElements(Callable &&func) const;
+        Matrix mappingOverElements(Callable &&func) const;
     };
 
 }
